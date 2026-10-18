@@ -20,5 +20,6 @@ class Financier extends Model
         'push_project',
         'project_distribution',
         'project_archive',
+        'archive',
     ];
 }

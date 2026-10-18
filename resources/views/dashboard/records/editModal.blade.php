@@ -33,6 +33,9 @@
         <x-form.input type="number" step="0.1" name="age" min="0" label="عمر المريض" required />
     </div>
     <div class="form-group col-md-3">
+        <x-form.input name="address" label="العنوان" />
+    </div>
+    <div class="form-group col-md-3">
         <x-form.input name="phone_number1" maxlength="10" label="جوال 1" required />
     </div>
     <div class="form-group col-md-3">

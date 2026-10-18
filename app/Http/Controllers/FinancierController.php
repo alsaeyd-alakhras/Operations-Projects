@@ -16,8 +16,15 @@ class FinancierController extends Controller
      */
     public function index()
     {
-        $financiers = Financier::all();
-        return view('dashboard.financiers.index', compact('financiers'));
+        $request = request();
+        if($request->archive == 1){
+            $financiers = Financier::where('archive',1)->orderByRaw("LPAD(financier_number, 10, '0') ASC")->get();
+            $archiveEnable = true;
+        }else{
+            $financiers = Financier::where('archive',0)->orderByRaw("LPAD(financier_number, 10, '0') ASC")->get();
+            $archiveEnable = false;
+        }
+        return view('dashboard.financiers.index', compact('financiers','archiveEnable'));
     }
 
     /**
@@ -68,6 +75,13 @@ class FinancierController extends Controller
         }else{
             $request->merge(['project_archive' => 0]);
         }
+        
+        if($request->has('archive')){
+            $request->merge(['archive' => $request->archive]);
+        }else{
+            $request->merge(['archive' => 0]);
+        }
+
         $financier = Financier::create($request->all());
         Logs::create([
             'type' => 'create',
@@ -133,6 +147,12 @@ class FinancierController extends Controller
         }else{
             $request->merge(['project_archive' => 0]);
         }
+
+        if($request->has('archive')){
+            $request->merge(['archive' => $request->archive]);
+        }else{
+            $request->merge(['archive' => 0]);
+        }
         $financier->update($request->all());
         Logs::create([
             'type' => 'update',
@@ -190,5 +210,16 @@ class FinancierController extends Controller
             return $pdf->stream();
         }
 
+    }
+
+    public function archive(Request $request)
+    {
+        $financier = Financier::findOrFail($request->id);
+
+        $financier->update([
+            'archive' => $financier->archive == 1 ? 0 : 1,
+        ]);
+
+        return redirect()->route('financiers.index')->with('success', 'تم أرشفة الممول بنجاح'); 
     }
 }

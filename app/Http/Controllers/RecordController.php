@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\RecordsExport;
 use App\Imports\RecordsImport;
 use App\Models\Financier;
 use App\Models\Logs;
@@ -243,14 +244,22 @@ class RecordController extends Controller
 
         return redirect()->route('records.index')->with('success', 'تم رفع ملف الإكسيل بنجاح');
     }
-
+    public function export(Request $request)
+    {
+        $this->authorize('exportexcel', Record::class);
+        $data = json_decode($request->data, true);
+        // تحويل البيانات إلى collect
+        $collection = collect($data);
+        return Excel::download(new RecordsExport($collection), 'سجلات المرضى ' . Carbon::now()->format('Y-m-d H:i:s') . '.xlsx');
+    }
 
     public function print(Request $request)
     {
         $this->authorize('export', Record::class);
         $records = json_decode($request->data, true); // 'true' لتحويلها إلى مصفوفة
         $recordsCollection = collect($records); // تحويل المصفوفة إلى Collection
-
+        $financiers_numbers = $recordsCollection->pluck('financier_number')->unique()->toArray();
+        $financiers = Financier::whereIn('financier_number', $financiers_numbers)->pluck('name')->toArray();
         Logs::create([
             'type' => 'print',
             'message' => 'تم طباعة تقرير : ' . $request->report,
@@ -276,7 +285,7 @@ class RecordController extends Controller
         ];
 
         if($request->report == 'basic'){
-            $pdf = PDF::loadView('dashboard.reports.basic',['records' =>  $recordsCollection,'recordsTotalArray' => $recordsTotalArray],[],[
+            $pdf = PDF::loadView('dashboard.reports.basic',['records' =>  $recordsCollection,'recordsTotalArray' => $recordsTotalArray,'financiers' => $financiers],[],[
                 'mode' => 'utf-8',
                 'format' => 'A4-L',
                 'default_font_size' => 12,

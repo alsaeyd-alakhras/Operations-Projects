@@ -31,6 +31,7 @@ class Record extends Model
         'notes_2',
         'user_name',
         'user_id',
+        'address',
     ];
 
     protected static function boot()

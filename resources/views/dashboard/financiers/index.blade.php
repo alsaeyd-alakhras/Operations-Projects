@@ -3,9 +3,13 @@
         <div class="col-12">
             <div class="row align-items-center mb-2">
                 <div class="col">
-                    <h2 class="mb-2 page-title">جدول الممولين</h2>
+                    <h2 class="mb-2 page-title">جدول الممولين - {{ $archiveEnable == true ? 'الأرشيف' : '' }}</h2>
                 </div>
                 <div class="col-auto d-flex justify-content-end align-items-center">
+                    @if($archiveEnable != true)
+                    <a class="btn btn-info mx-2" href="{{route('financiers.index',['archive' => 1])}}">
+                        الأرشيف
+                    </a>
                     @can('create', 'App\\Models\Financier')
                     <a class="btn btn-success mx-2" href="{{route('financiers.create')}}">
                         <i class="fe fe-plus"></i>
@@ -18,6 +22,7 @@
                         <button type="submit" class="btn btn-info">طباعة pdf</button>
                     </form>
                     @endcan
+                    @endif
                 </div>
             </div>
             <div class="row my-4">
@@ -125,6 +130,13 @@
                                                 <a class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;"
                                                     href="{{route('financiers.edit',$financier->id)}}">تعديل</a>
                                                 @endcan
+                                                <form action="{{route('financiers.archive')}}" method="post">
+                                                    @csrf
+                                                    <input type="hidden" name="id" value="{{$financier->id}}">
+                                                    <button type="submit" class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;" href="#">
+                                                        {{ $archiveEnable == true ? 'إستعادة' : 'أرشفة' }}
+                                                    </button>
+                                                </form>
                                                 @can('delete', 'App\\Models\Financier')
                                                 <form action="{{route('financiers.destroy',$financier->id)}}" method="post">
                                                     @csrf

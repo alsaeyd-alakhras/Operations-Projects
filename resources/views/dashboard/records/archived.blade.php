@@ -1,69 +1,19 @@
 <x-front-layout>
     @push('styles')
         <!-- DataTables CSS -->
-        <link rel="stylesheet" href="{{asset('css/jquery.dataTables.min.css')}}">
-        {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css"> --}}
-        <link rel="stylesheet" href="{{asset('css/dataTables.bootstrap4.css')}}">
-        <link rel="stylesheet" href="{{asset('css/dataTables.dataTables.css')}}">
-        <link rel="stylesheet" href="{{asset('css/buttons.dataTables.css')}}">
-        <link rel="stylesheet" href="{{asset('css/stickyTable.css')}}">
+        <link rel="stylesheet" href="{{asset('css/datatable/jquery.dataTables.min.css')}}">
+        <link rel="stylesheet" href="{{asset('css/datatable/dataTables.bootstrap4.css')}}">
+        <link rel="stylesheet" href="{{asset('css/datatable/dataTables.dataTables.css')}}">
+        <link rel="stylesheet" href="{{asset('css/datatable/buttons.dataTables.css')}}">
+
+
+        <link id="stickyTableLight" rel="stylesheet" href="{{ asset('css/stickyTable.css') }}">
+        <link id="stickyTableDark" rel="stylesheet" href="{{ asset('css/stickyTableDark.css') }}" disabled>
+        <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/datatableIndex.css') }}">
         <style>
-            .filterDropdownMenu.dropdown-menu.show{
-                display: flex ;
-                justify-content: space-between;
-                align-items: center;
-                top: 20px !important;
-            }
-
-            body{
-                font-family: 'Arial', sans-serif;
-            }
-            .main-content{
-                margin: 15px 0 0 0 !important;
-            }
-            td, th {
-                font-size: 16px !important;
-
-            }
-            tbody td{
-                color: #000 !important;
-                font-weight: 400 !important;
-            }
-            table.dataTable th, table.dataTable td {
-                box-sizing: content-box !important;
-                white-space: nowrap !important;
-            }
-            thead th{
-                color: #ffffff !important;
-            }
-            tbody td{
-                padding: 2px 5px !important;
-            }
-            /* تعطيل مؤشر الفرز لرأس العمود */
-            th.no-sort::after {
-                display: none !important;
-            }
-            .breadcrumb{
-                display: none !important;
-            }
-            .filter-dropdown{
-                display: none;
-            }
-            .dt-layout-row{
-                margin: 0 !important;
-            }
-            .dt-search{
-                display: none !important;
-            }
-            .organization{
-                width: 130px !important;
-                overflow: hidden;
-                display: block;
-
-                transition: all 0.5s ease-in-out;
-            }
-            .organization:hover {
-                width: 100% !important;
+            th{
+                color: #fff !important;
             }
         </style>
     @endpush
@@ -503,15 +453,16 @@
 
     @push('scripts')
         <!-- DataTables JS -->
-        <script src="{{asset('js/jquery.dataTables.min.js')}}"></script>
-        <script src="{{asset('js/dataTables.js')}}"></script>
-        <script src="{{asset('js/dataTables.buttons.js')}}"></script>
-        <script src="{{asset('js/buttons.dataTables.js')}}"></script>
-        <script src="{{asset('js/jszip.min.js')}}"></script>
-        <script src="{{asset('js/pdfmake.min.js')}}"></script>
-        <script src="{{asset('js/vfs_fonts.js')}}"></script>
-        <script src="{{asset('js/buttons.html5.min.js')}}"></script>
-        <script src="{{asset('js/buttons.print.min.js')}}"></script>
+        <script src="{{asset('js/datatable/jquery.dataTables.min.js')}}"></script>
+        <script src="{{asset('js/datatable/dataTables.js')}}"></script>
+        <script src="{{asset('js/datatable/dataTables.buttons.js')}}"></script>
+        <script src="{{asset('js/datatable/buttons.dataTables.js')}}"></script>
+        <script src="{{asset('js/datatable/jszip.min.js')}}"></script>
+        <script src="{{asset('js/datatable/pdfmake.min.js')}}"></script>
+        <script src="{{asset('js/datatable/vfs_fonts.js')}}"></script>
+        <script src="{{asset('js/datatable/buttons.html5.min.js')}}"></script>
+        <script src="{{asset('js/datatable/buttons.print.min.js')}}"></script>
+
         <script src="{{asset('js/jquery.validate.min.js')}}"></script>
         <script type="text/javascript">
             $(document).ready(function() {

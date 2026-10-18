@@ -12,14 +12,14 @@ table.sticky {
 
 
 table.sticky thead {
-    background-color: #5b9bd5;
+    background-color: #ff4c51;
     position: sticky;
     top: -3px;
     z-index: 4; /* تأكد من بقاء الرأس فوق بقية المحتوى */
 }
 table.sticky tfoot {
     outline: 1px solid #06060675;
-    background-color: #5b9bd5;
+    background-color: #ff4c51;
     position: sticky;
     bottom: -3px;
     z-index: 3; /* تأكد من بقاء الرأس فوق بقية المحتوى */

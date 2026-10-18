@@ -12,7 +12,7 @@
     <!-- Fonts CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Icons CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/feather.css') }}">
@@ -29,8 +29,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/app-dark.css') }}" id="darkTheme" disabled>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
+        *{
+            font-family: 'Tajawal', sans-serif !important;
         }
     </style>
     @stack('styles')

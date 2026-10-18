@@ -168,7 +168,7 @@
                                                             </div>
                                                         </div>
                                                         <label>
-                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="5" data-field="financier_number" disabled> فارغ
+                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="5" data-field="financier_number"> فارغ
                                                         </label>
                                                     </div>
                                                 </div>
@@ -178,11 +178,44 @@
                                 </th>
                                 <th>اسم الممول</th>
                                 <th>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span>العنوان</span>
+                                        <div class="filter-dropdown ml-4">
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary btn-filter" id="btn-filter-7" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fe fe-pocket text-white"></i>
+                                                </button>
+                                                <div class="filterDropdownMenu dropdown-menu dropdown-menu-right p-2" aria-labelledby="address_filter">
+                                                    <!-- إضافة checkboxes بدلاً من select -->
+                                                    <div class="searchable-checkbox">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <input type="search" class="form-control search-checkbox" data-index="7" placeholder="ابحث...">
+                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="7" data-field="address">
+                                                                <i class="fe fe-check"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="checkbox-list-box">
+                                                            <label style="display: block;">
+                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="7"> الكل
+                                                            </label>
+                                                            <div class="checkbox-list checkbox-list-7">
+                                                            </div>
+                                                        </div>
+                                                        <label>
+                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="7" data-field="address"> فارغ
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
                                     <div class='d-flex align-items-center justify-content-between'>
                                         <span>العمر</span>
                                         <div class='filter-dropdown ml-4'>
                                             <div class="dropdown">
-                                                <button class="btn btn-secondary btn-filter" id="btn-filter-7" type="button" id="date_filter" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <button class="btn btn-secondary btn-filter" id="btn-filter-8" type="button" id="date_filter" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fe fe-pocket text-white"></i>
                                                 </button>
                                                 <div class="filterDropdownMenu dropdown-menu dropdown-menu-right p-2" aria-labelledby="date_filter">
@@ -205,27 +238,27 @@
                                         <span>رقم الهوية</span>
                                         <div class="filter-dropdown ml-4">
                                             <div class="dropdown">
-                                                <button class="btn btn-secondary btn-filter" id="btn-filter-8" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <button class="btn btn-secondary btn-filter" id="btn-filter-9" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fe fe-pocket text-white"></i>
                                                 </button>
                                                 <div class="filterDropdownMenu dropdown-menu dropdown-menu-right p-2" aria-labelledby="patient_ID_filter">
                                                     <!-- إضافة checkboxes بدلاً من select -->
                                                     <div class="searchable-checkbox">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <input type="search" class="form-control search-checkbox" data-index="8" placeholder="ابحث...">
-                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="8" data-field="patient_ID_th">
+                                                            <input type="search" class="form-control search-checkbox" data-index="9" placeholder="ابحث...">
+                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="9" data-field="patient_ID_th">
                                                                 <i class="fe fe-check"></i>
                                                             </button>
                                                         </div>
                                                         <div class="checkbox-list-box">
                                                             <label style="display: block;">
-                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="8"> الكل
+                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="9"> الكل
                                                             </label>
-                                                            <div class="checkbox-list checkbox-list-8">
+                                                            <div class="checkbox-list checkbox-list-9">
                                                             </div>
                                                         </div>
                                                         <label>
-                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="8" data-field="patient_ID" disabled> فارغ
+                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="9" data-field="patient_ID"> فارغ
                                                         </label>
                                                     </div>
                                                 </div>
@@ -240,27 +273,27 @@
                                         <span>العملية</span>
                                         <div class="filter-dropdown ml-4">
                                             <div class="dropdown">
-                                                <button class="btn btn-secondary btn-filter" id="btn-filter-11" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <button class="btn btn-secondary btn-filter" id="btn-filter-12" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fe fe-pocket text-white"></i>
                                                 </button>
                                                 <div class="filterDropdownMenu dropdown-menu dropdown-menu-right p-2" aria-labelledby="operation_filter">
                                                     <!-- إضافة checkboxes بدلاً من select -->
                                                     <div class="searchable-checkbox">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <input type="search" class="form-control search-checkbox" data-index="11" placeholder="ابحث...">
-                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="11" data-field="operation_th">
+                                                            <input type="search" class="form-control search-checkbox" data-index="12" placeholder="ابحث...">
+                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="12" data-field="operation_th">
                                                                 <i class="fe fe-check"></i>
                                                             </button>
                                                         </div>
                                                         <div class="checkbox-list-box">
                                                             <label style="display: block;">
-                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="11"> الكل
+                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="12"> الكل
                                                             </label>
-                                                            <div class="checkbox-list checkbox-list-11">
+                                                            <div class="checkbox-list checkbox-list-12">
                                                             </div>
                                                         </div>
                                                         <label>
-                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="11" data-field="operation" disabled> فارغ
+                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="12" data-field="operation"> فارغ
                                                         </label>
                                                     </div>
                                                 </div>
@@ -273,27 +306,27 @@
                                         <span>الطبيب</span>
                                         <div class="filter-dropdown ml-4">
                                             <div class="dropdown">
-                                                <button class="btn btn-secondary btn-filter" id="btn-filter-12" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <button class="btn btn-secondary btn-filter" id="btn-filter-13" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                     <i class="fe fe-pocket text-white"></i>
                                                 </button>
                                                 <div class="filterDropdownMenu dropdown-menu dropdown-menu-right p-2" aria-labelledby="doctor_filter">
                                                     <!-- إضافة checkboxes بدلاً من select -->
                                                     <div class="searchable-checkbox">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <input type="search" class="form-control search-checkbox" data-index="12" placeholder="ابحث...">
-                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="12" data-field="doctor_th">
+                                                            <input type="search" class="form-control search-checkbox" data-index="13" placeholder="ابحث...">
+                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="13" data-field="doctor_th">
                                                                 <i class="fe fe-check"></i>
                                                             </button>
                                                         </div>
                                                         <div class="checkbox-list-box">
                                                             <label style="display: block;">
-                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="12"> الكل
+                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="13"> الكل
                                                             </label>
-                                                            <div class="checkbox-list checkbox-list-12">
+                                                            <div class="checkbox-list checkbox-list-13">
                                                             </div>
                                                         </div>
                                                         <label>
-                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="12" data-field="doctor" disabled> فارغ
+                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="13" data-field="doctor"> فارغ
                                                         </label>
                                                     </div>
                                                 </div>
@@ -325,7 +358,7 @@
                                                         @endforeach
                                                     </datalist>
                                                     <div>
-                                                        <button class='btn btn-success text-white filter-apply-btn' data-target="19" data-field="user_name">
+                                                        <button class='btn btn-success text-white filter-apply-btn' data-target="20" data-field="user_name">
                                                             <i class='fe fe-check'></i>
                                                         </button>
                                                     </div>
@@ -341,7 +374,8 @@
                         <tfoot>
                             <tr>
                                 <td></td>
-                                <td class="text-white opacity-7 text-center" id="count_records"></td>
+                                <td class="text-white opacity-8 text-center" id="count_records"></td>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td class='sticky text-right'>المجموع</td>
@@ -465,6 +499,15 @@
         </div>
     </div>
 
+    <form action="{{route('records.export')}}" id="exportExcelForm" style="display: none;" method="post" target="_blank">
+        <div class="modal-body">
+            @csrf
+            <input type="hidden" name="data" value="">
+        </div>
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-info">طباعة</button>
+        </div>
+    </form>
 
     @push('scripts')
         <!-- DataTables JS -->
@@ -517,7 +560,7 @@
                                     title: 'التقارير', // تخصيص العنوان عند التصدير
                                     className: 'd-none', // إخفاء الزر الأصلي
                                     exportOptions: {
-                                        columns: [1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], // تحديد الأعمدة التي سيتم تصديرها (يمكن تعديلها حسب الحاجة)
+                                        columns: [1, 2, 3, 4, 5,6,8,8,9,10,11,12,13,14,15,16,17,18,19,20], // تحديد الأعمدة التي سيتم تصديرها (يمكن تعديلها حسب الحاجة)
                                         modifier: {
                                             search: 'applied', // تصدير البيانات المفلترة فقط
                                             order: 'applied',  // تصدير البيانات مع الترتيب الحالي
@@ -547,7 +590,7 @@
                     },
                     columns: [
                         { data: 'edit', name: 'edit', orderable: false, searchable: false, render: function(data, type, row) {
-                            @can('edit','App\\Models\Record')
+                            @can('update','App\\Models\Record')
                                 let link = `<button class="btn btn-sm p-1 btn-icon text-primary edit_row"  data-id=":record"><i class="fe fe-edit"></i></button>`.replace(':record', data);
                                 return link ;
                             @else
@@ -563,6 +606,7 @@
                         { data: 'name', name: 'name' , orderable: false, class: 'sticky' },
                         { data: 'financier_number', name: 'financier_number' , orderable: false},
                         { data: 'financier', name: 'financier' , orderable: false},
+                        { data: 'address', name: 'address' , orderable: false},
                         { data: 'age', name: 'age', orderable: false},
                         { data: 'patient_ID', name: 'patient_ID'  , orderable: false},
                         { data: 'phone_number1', name: 'phone_number1'  , orderable: false},
@@ -712,15 +756,18 @@
                     tableContainer.scrollTop(tableContainer[0].scrollHeight);
                 });
                 // نسخ وظيفة الزر إلى الزر المخصص
-                $('#excel-export').on('click', function () {
-                    table.button('.buttons-excel').trigger(); // استدعاء وظيفة الزر الأصلي
+                $('#excel-export').on('click', function (e) {
+                    let tableData = table.rows({ search: 'applied' }).data().toArray(); // الحصول على البيانات المعروضة فقط (المفلترة)
+                    let jsonData = JSON.stringify(tableData); // تحويل البيانات إلى JSON
+                    // تعيين القيمة في حقل <input> المخفي
+                    $('input[name="data"]').val(jsonData);
+                    $('#exportExcelForm').submit();
                 });
                 $(document).on('click', '#print-report', function () {
                     // بعد تحميل الجدول أو عند إجراء تغييرات عليه
                     let tableData = table.rows({ search: 'applied' }).data().toArray(); // الحصول على البيانات المعروضة فقط (المفلترة)
 
                     let jsonData = JSON.stringify(tableData); // تحويل البيانات إلى JSON
-                    console.log(tableData,jsonData);
                     // تعيين القيمة في حقل <input> المخفي
                     $('input[name="data"]').val(jsonData);
                     $('#printReport').modal('show');
@@ -756,9 +803,10 @@
                 function rebuildFilters() {
                     isColumnFiltered(4) ? '' : populateFilterOptions(4, '.checkbox-list-4','name_th');
                     isColumnFiltered(5) ? '' : populateFilterOptions(5, '.checkbox-list-5','financier_th');
-                    isColumnFiltered(8) ? '' : populateFilterOptions(8, '.checkbox-list-8','patient_ID_th');
-                    isColumnFiltered(11) ? '' : populateFilterOptions(11, '.checkbox-list-11','operation_th');
-                    isColumnFiltered(12) ? '' : populateFilterOptions(12, '.checkbox-list-12','doctor_th');
+                    isColumnFiltered(7) ? '' : populateFilterOptions(7, '.checkbox-list-7','address');
+                    isColumnFiltered(9) ? '' : populateFilterOptions(9, '.checkbox-list-9','patient_ID_th');
+                    isColumnFiltered(12) ? '' : populateFilterOptions(12, '.checkbox-list-12','operation_th');
+                    isColumnFiltered(13) ? '' : populateFilterOptions(13, '.checkbox-list-13','doctor_th');
 
                     for (let i = 1; i <= 20; i++) {
                         if (isColumnFiltered(i)) {
@@ -923,6 +971,7 @@
                     date: '',
                     name: '',
                     financier_number: '',
+                    address: '',
                     age: '',
                     patient_ID: '',
                     phone_number1: '',
@@ -951,6 +1000,7 @@
                             record.date = response.date;
                             record.name = response.name;
                             record.financier_number = response.financier_number;
+                            record.address = response.address;
                             record.age = response.age;
                             record.patient_ID = response.patient_ID;
                             record.phone_number1 = response.phone_number1;
@@ -1077,6 +1127,7 @@
                             record.date = response.date;
                             record.name = response.name;
                             record.financier_number = response.financier_number;
+                            record.address = response.address;
                             record.age = response.age;
                             record.patient_ID = response.patient_ID;
                             record.phone_number1 = response.phone_number1;

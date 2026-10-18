@@ -88,15 +88,20 @@
         <table class="blueTable">
             <thead>
                 <tr>
-                    <td colspan="10" style="border:0;">
+                    <td colspan="11" style="border:0;">
                         <p>
                             <span>مستشفى يافا الطبي</span> /
-                            <span>مشروع إجراء عمليات جراحية وتدخلات طبية</span>
+                            <span>مشروع إجراء عمليات جراحية وتدخلات طبية</span> /
+                            <span>الممولين : 
+                                @foreach ($financiers as $financier)
+                                    {{ $financier }} ,
+                                @endforeach
+                            </span>
                         </p>
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="12" align="center" style="color: #000;border:0;">
+                    <td colspan="11" align="center" style="color: #000;border:0;">
                         <h1>مشروع العمليات الطبية</h1>
                     </td>
                 </tr>
@@ -105,7 +110,9 @@
                     <th>تمت <br> العملية</th>
                     <th>التاريخ</th>
                     <th style="white-space: nowrap;">الاسم</th>
-                    <th>الممول</th>
+                    <!-- <th>رقم <br> الممول</th> -->
+                    <!-- <th>الممول</th> -->
+                    <th>السكن</th>
                     <th>العمر</th>
                     <th>الهوية</th>
                     <th>جوال 1</th>
@@ -113,6 +120,8 @@
                     <th style="white-space: nowrap;">العملية</th>
                     <th style="white-space: nowrap;">الطبيب</th>
                     <th>التكلفة</th>
+                    <th>الملاحظات</th>
+                    <th>الملاحظات الثانوية</th>
                 </tr>
             </thead>
             <tbody>
@@ -121,12 +130,14 @@
                         <td>{{$loop->iteration}}</td>
                         <td>
                             @if ($record['done'] == 1)
-                            <p style="font-family: Helvetica, Arial, Sans-Serif; font-size: 16px;">&#9745;</p>
+                                <p style="font-family: Helvetica, Arial, Sans-Serif; font-size: 16px;">&#9745;</p>
                             @endif
                         </td>
                         <td>{{$record['date']}}</td>
                         <td style="white-space: nowrap;">{{$record['name']}}</td>
-                        <td>{{$record['financier_number']}}</td>
+                        <!-- <td style="text-align: center;">{{$record['financier_number']}}</td> -->
+                        <!-- <td>{{ App\Models\Financier::where('financier_number',$record['financier_number'])->first() ? App\Models\Financier::where('financier_number',$record['financier_number'])->first()->name : '---'  }}</td> -->
+                        <td>{{$record['address']}}</td>
                         <td>{{$record['age']}}</td>
                         <td>{{$record['patient_ID']}}</td>
                         <td>{{$record['phone_number1']}}</td>
@@ -134,14 +145,18 @@
                         <td style="white-space: nowrap;">{{$record['operation']}}</td>
                         <td style="white-space: nowrap;">{{$record['doctor']}}</td>
                         <td>{{$record['amount']}}</td>
+                        <td>{{$record['notes']}}</td>
+                        <td>{{$record['notes_2']}}</td>
                     </tr>
-            @endforeach
+                @endforeach
             </tbody>
             <tfoot>
                 <tr>
                     <td>00</td>
                     <td colspan="10">المجموع</td>
                     <td>{{number_format($recordsTotalArray['amount'])}}</td>
+                    <td></td>
+                    <td></td>
                 </tr>
             </tfoot>
         </table>
