@@ -43,6 +43,10 @@ class TableRecord extends Component
         'bed' => '',
         'private' => '',
         'notes' => '',
+        'displacement_status' => '',
+        'income_status' => '',
+        'family_burden' => '',
+        'distributed' => '',
         'done' => '',
     ];
 
@@ -56,6 +60,10 @@ class TableRecord extends Component
         'doctor' => '',
         'anesthesia' => '',
         'done' => '',
+        'displacement_status' => '',
+        'income_status' => '',
+        'family_burden' => '',
+        'distributed' => '',
     ];
 
     public $financier_numbers;
@@ -108,7 +116,7 @@ class TableRecord extends Component
                 }elseif($key == 'to_date'){
                     $value = \Carbon\Carbon::parse($value)->format('Y-m-d');
                     $this->records = $this->records->where('date', '<=', $value);
-                }elseif($key == 'financier_number' || $key == 'operation' || $key == 'doctor' || $key == 'anesthesia' || $key == 'done'){
+                }elseif($key == 'financier_number' || $key == 'operation' || $key == 'doctor' || $key == 'anesthesia' || $key == 'done' || $key == 'displacement_status' || $key == 'income_status' || $key == 'family_burden' || $key == 'distributed'){
                     $this->records = $this->records->where($key, '=', $value);
                 }else{
                     $this->records = $this->records->where($key, 'like', '%'.$value.'%');

@@ -18,12 +18,12 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         // Record::factory(100)->create();
 
-        // User::create([
-        //     'name' => 'Administrator',
-        //     'username' => 'saeyd_jamal',
-        //     'password' => Hash::make('20051118Jamal'),
-        //     'email' => 'alsaeydjalkhras@gmail.com',
-        //     'super_admin' => 1
-        // ]);
+        User::create([
+            'name' => 'Administrator',
+            'username' => 'saeyd_jamal',
+            'password' => Hash::make('20051118Jamal'),
+            'email' => 'alsaeydjalkhras@gmail.com',
+            'super_admin' => 1
+        ]);
     }
 }

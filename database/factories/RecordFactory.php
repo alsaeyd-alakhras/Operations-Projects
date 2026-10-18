@@ -34,6 +34,10 @@ class RecordFactory extends Factory
             'private' => $this->faker->numberBetween(1, 100),
             'done' => $this->faker->boolean(),
             'notes' => $this->faker->sentence(),
+            'displacement_status' => $this->faker->randomElement(array_keys(\App\Models\Record::DISPLACEMENT_STATUSES)),
+            'income_status' => $this->faker->randomElement(array_keys(\App\Models\Record::INCOME_STATUSES)),
+            'family_burden' => $this->faker->randomElement(array_keys(\App\Models\Record::FAMILY_BURDENS)),
+            'distributed' => $this->faker->boolean(),
             'user_id' => 1,
             'user_name' => 'saeyd_jamal',
         ];

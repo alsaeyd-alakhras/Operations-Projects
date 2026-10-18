@@ -44,6 +44,33 @@ class RecordsImport implements ToModel,WithHeadingRow
             'done' => $row['tmt_alaamly'],
             'notes' => $row['mlahthat'],
             'notes_2' => $row['mlahthat_thanoy'],
+            'displacement_status' => $this->choice($row, ['hal_alnzwh_walskn_wtdrr_albyt', 'displacement_status'], Record::DISPLACEMENT_STATUSES),
+            'income_status' => $this->choice($row, ['msadr_aldkhl_walwd_almaly', 'income_status'], Record::INCOME_STATUSES),
+            'family_burden' => $this->choice($row, ['hjm_alasr_walhalat_alkhas', 'family_burden'], Record::FAMILY_BURDENS),
+            'distributed' => $this->distributed($row),
         ]);
+    }
+
+    private function choice(array $row, array $headers, array $options): ?string
+    {
+        foreach ($headers as $header) {
+            if (array_key_exists($header, $row) && $row[$header] !== null && $row[$header] !== '') {
+                $value = trim($row[$header]);
+                return array_key_exists($value, $options) ? $value : (array_search($value, $options, true) ?: null);
+            }
+        }
+
+        return null;
+    }
+
+    private function distributed(array $row): ?bool
+    {
+        foreach (['tm_altwzy', 'distributed'] as $header) {
+            if (array_key_exists($header, $row) && $row[$header] !== null && $row[$header] !== '') {
+                return in_array($row[$header], [1, '1', true, 'نعم', 'yes'], true);
+            }
+        }
+
+        return null;
     }
 }

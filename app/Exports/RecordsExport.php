@@ -41,6 +41,10 @@ class RecordsExport implements FromCollection,WithHeadings
                 $item['private'],
                 $item['notes'],
                 $item['notes_2'],
+                Record::DISPLACEMENT_STATUSES[$item['displacement_status'] ?? null] ?? '',
+                Record::INCOME_STATUSES[$item['income_status'] ?? null] ?? '',
+                Record::FAMILY_BURDENS[$item['family_burden'] ?? null] ?? '',
+                array_key_exists('distributed', $item) && !is_null($item['distributed']) ? ($item['distributed'] ? 'نعم' : 'لا') : '',
                 $item['user_name'],
                 $item['done'],
             ];
@@ -70,6 +74,10 @@ class RecordsExport implements FromCollection,WithHeadings
             'خاص',
             'ملاحظات',
             'ملاحظات ثانوية',
+            'حالة النزوح والسكن وتضرر البيت',
+            'مصادر الدخل والوضع المالي',
+            'حجم الأسرة والحالات الخاصة',
+            'تم التوزيع',
             'المستخدم',
             'تمت العملية',
         ];

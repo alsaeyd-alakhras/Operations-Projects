@@ -179,6 +179,105 @@
                                 <th>اسم الممول</th>
                                 <th>
                                     <div class='d-flex align-items-center justify-content-between'>
+                                        <span>حالة النزوح والسكن وتضرر البيت</span>
+                                        <div class='filter-dropdown ml-4'>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary btn-filter" id="btn-filter-7" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fe fe-pocket text-white"></i>
+                                                </button>
+                                                <div class="filterDropdownMenu dropdown-menu dropdown-menu-right p-2" aria-labelledby="btn-filter-7">
+                                                    <select name="displacement_status_filter" class="form-control" style="width: 260px">
+                                                        <option value=""></option>
+                                                        @foreach (\App\Models\Record::DISPLACEMENT_STATUSES as $key => $label)
+                                                            <option value="{{ $key }}">{{ $label }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div>
+                                                        <button class='btn btn-success text-white filter-apply-btn' data-target="7" data-field="displacement_status_filter">
+                                                            <i class='fe fe-check'></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class='d-flex align-items-center justify-content-between'>
+                                        <span>مصادر الدخل والوضع المالي</span>
+                                        <div class='filter-dropdown ml-4'>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary btn-filter" id="btn-filter-8" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fe fe-pocket text-white"></i>
+                                                </button>
+                                                <div class="filterDropdownMenu dropdown-menu dropdown-menu-right p-2" aria-labelledby="btn-filter-8">
+                                                    <select name="income_status_filter" class="form-control" style="width: 260px">
+                                                        <option value=""></option>
+                                                        @foreach (\App\Models\Record::INCOME_STATUSES as $key => $label)
+                                                            <option value="{{ $key }}">{{ $label }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div>
+                                                        <button class='btn btn-success text-white filter-apply-btn' data-target="8" data-field="income_status_filter">
+                                                            <i class='fe fe-check'></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class='d-flex align-items-center justify-content-between'>
+                                        <span>حجم الأسرة والحالات الخاصة</span>
+                                        <div class='filter-dropdown ml-4'>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary btn-filter" id="btn-filter-9" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fe fe-pocket text-white"></i>
+                                                </button>
+                                                <div class="filterDropdownMenu dropdown-menu dropdown-menu-right p-2" aria-labelledby="btn-filter-9">
+                                                    <select name="family_burden_filter" class="form-control" style="width: 260px">
+                                                        <option value=""></option>
+                                                        @foreach (\App\Models\Record::FAMILY_BURDENS as $key => $label)
+                                                            <option value="{{ $key }}">{{ $label }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <div>
+                                                        <button class='btn btn-success text-white filter-apply-btn' data-target="9" data-field="family_burden_filter">
+                                                            <i class='fe fe-check'></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class='d-flex align-items-center justify-content-between'>
+                                        <span>تم التوزيع</span>
+                                        <div class='filter-dropdown ml-4'>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary btn-filter" id="btn-filter-10" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fe fe-pocket text-white"></i>
+                                                </button>
+                                                <div class="filterDropdownMenu dropdown-menu dropdown-menu-right p-2" aria-labelledby="btn-filter-10">
+                                                    <select name="distributed_filter" class="form-control" style="width: 260px">
+                                                        <option value=""></option>
+                                                        <option value="1">نعم</option>
+                                                        <option value="0">لا</option>
+                                                    </select>
+                                                    <div>
+                                                        <button class='btn btn-success text-white filter-apply-btn' data-target="10" data-field="distributed_filter">
+                                                            <i class='fe fe-check'></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class='d-flex align-items-center justify-content-between'>
                                         <span>العمر</span>
                                         <div class='filter-dropdown ml-4'>
                                             <div class="dropdown">
@@ -212,13 +311,13 @@
                                                     <!-- إضافة checkboxes بدلاً من select -->
                                                     <div class="searchable-checkbox">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <input type="search" class="form-control search-checkbox" data-index="8" placeholder="ابحث...">
-                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="8" data-field="patient_ID_th">
+                                                            <input type="search" class="form-control search-checkbox" data-index="12" placeholder="ابحث...">
+                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="12" data-field="patient_ID_th">
                                                                 <i class="fe fe-check"></i>
                                                             </button>
                                                         </div>
                                                         <div class="checkbox-list-box">
-                                                            <div class="checkbox-list checkbox-list-8">
+                                                            <div class="checkbox-list checkbox-list-12">
                                                                 @foreach ($pat_ids as $pat_id)
                                                                     <label style="display: block;">
                                                                         <input type="checkbox" value="{{ $pat_id }}" class="patient_ID_th-checkbox"> {{ $pat_id }}
@@ -227,7 +326,7 @@
                                                             </div>
                                                         </div>
                                                         <label>
-                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="8" data-field="patient_ID" disabled> فارغ
+                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="12" data-field="patient_ID" disabled> فارغ
                                                         </label>
                                                     </div>
                                                 </div>
@@ -249,16 +348,16 @@
                                                     <!-- إضافة checkboxes بدلاً من select -->
                                                     <div class="searchable-checkbox">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <input type="search" class="form-control search-checkbox" data-index="11" placeholder="ابحث...">
-                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="11" data-field="operation_th">
+                                                            <input type="search" class="form-control search-checkbox" data-index="15" placeholder="ابحث...">
+                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="15" data-field="operation_th">
                                                                 <i class="fe fe-check"></i>
                                                             </button>
                                                         </div>
                                                         <div class="checkbox-list-box">
                                                             <label style="display: block;">
-                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="11"> الكل
+                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="15"> الكل
                                                             </label>
-                                                            <div class="checkbox-list checkbox-list-11">
+                                                            <div class="checkbox-list checkbox-list-15">
                                                                 @foreach ($operations as $operation)
                                                                     <label style="display: block;">
                                                                         <input type="checkbox" value="{{ $operation }}" class="operation_th-checkbox"> {{ $operation }}
@@ -267,7 +366,7 @@
                                                             </div>
                                                         </div>
                                                         <label>
-                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="11" data-field="operation" disabled> فارغ
+                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="15" data-field="operation" disabled> فارغ
                                                         </label>
                                                     </div>
                                                 </div>
@@ -287,16 +386,16 @@
                                                     <!-- إضافة checkboxes بدلاً من select -->
                                                     <div class="searchable-checkbox">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <input type="search" class="form-control search-checkbox" data-index="12" placeholder="ابحث...">
-                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="12" data-field="doctor_th">
+                                                            <input type="search" class="form-control search-checkbox" data-index="16" placeholder="ابحث...">
+                                                            <button class="btn btn-success text-white filter-apply-btn-checkbox" data-target="16" data-field="doctor_th">
                                                                 <i class="fe fe-check"></i>
                                                             </button>
                                                         </div>
                                                         <div class="checkbox-list-box">
                                                             <label style="display: block;">
-                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="12"> الكل
+                                                                <input type="checkbox" value="all" class="all-checkbox" data-index="16"> الكل
                                                             </label>
-                                                            <div class="checkbox-list checkbox-list-12">
+                                                            <div class="checkbox-list checkbox-list-16">
                                                                 @foreach ($doctors as $doctor)
                                                                     <label style="display: block;">
                                                                         <input type="checkbox" value="{{ $doctor }}" class="doctor_th-checkbox"> {{ $doctor }}
@@ -305,7 +404,7 @@
                                                             </div>
                                                         </div>
                                                         <label>
-                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="12" data-field="doctor" disabled> فارغ
+                                                            <input type="checkbox" value="null" class="null-checkbox" data-index="16" data-field="doctor" disabled> فارغ
                                                         </label>
                                                     </div>
                                                 </div>
@@ -345,7 +444,7 @@
                                                         @endforeach
                                                     </datalist>
                                                     <div>
-                                                        <button class='btn btn-success text-white filter-apply-btn' data-target="19" data-field="user_name">
+                                                        <button class='btn btn-success text-white filter-apply-btn' data-target="23" data-field="user_name">
                                                             <i class='fe fe-check'></i>
                                                         </button>
                                                     </div>
@@ -365,6 +464,10 @@
                                 <td></td>
                                 <td></td>
                                 <td class='sticky text-right'>المجموع</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -502,7 +605,7 @@
                                     title: 'التقارير', // تخصيص العنوان عند التصدير
                                     className: 'd-none', // إخفاء الزر الأصلي
                                     exportOptions: {
-                                        columns: [1, 2, 3, 4, 5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], // تحديد الأعمدة التي سيتم تصديرها (يمكن تعديلها حسب الحاجة)
+                                        columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], // تحديد الأعمدة التي سيتم تصديرها (يمكن تعديلها حسب الحاجة)
                                         modifier: {
                                             search: 'applied', // تصدير البيانات المفلترة فقط
                                             order: 'applied',  // تصدير البيانات مع الترتيب الحالي
@@ -548,6 +651,10 @@
                         { data: 'name', name: 'name' , orderable: false, class: 'sticky' },
                         { data: 'financier_number', name: 'financier_number' , orderable: false},
                         { data: 'financier', name: 'financier' , orderable: false},
+                        { data: 'displacement_status', name: 'displacement_status', orderable: false, render: function(data, type, row) { return row.displacement_status_label || ''; }},
+                        { data: 'income_status', name: 'income_status', orderable: false, render: function(data, type, row) { return row.income_status_label || ''; }},
+                        { data: 'family_burden', name: 'family_burden', orderable: false, render: function(data, type, row) { return row.family_burden_label || ''; }},
+                        { data: 'distributed', name: 'distributed', orderable: false, render: function(data, type, row) { return row.distributed_label || ''; }},
                         { data: 'age', name: 'age', orderable: false},
                         { data: 'patient_ID', name: 'patient_ID'  , orderable: false},
                         { data: 'phone_number1', name: 'phone_number1'  , orderable: false},
@@ -607,7 +714,7 @@
                             $(this).find('td').eq(4).css('right', '0px');
                             $(this).find('td').eq(5).css('text-align', 'center');
                             $(this).find('td').eq(6).css('text-align', 'center');
-                            $(this).find('td').eq(12).css('text-align', 'center');
+                            $(this).find('td').eq(16).css('text-align', 'center');
                         });
                     },
                     footerCallback: function(row, data, start, end, display) {
@@ -623,35 +730,35 @@
                         var rowCount = display.length;
                         // total_amount 13
                         var total_amount_sum = api
-                            .column(13, { page: 'current' }) // العمود الرابع
+                            .column(17, { page: 'current' }) // العمود الرابع
                             .data()
                             .reduce(function(a, b) {
                                 return intVal(a) + intVal(b);
                             }, 0);
                         // total_doctor_share 14
                         var total_doctor_share_sum = api
-                            .column(14, { page: 'current' }) // العمود الرابع
+                            .column(18, { page: 'current' }) // العمود الرابع
                             .data()
                             .reduce(function(a, b) {
                                 return intVal(a) + intVal(b);
                             }, 0);
                         // total_anesthesiologists_share 16
                         var total_anesthesiologists_share_sum = api
-                            .column(16, { page: 'current' }) // العمود الرابع
+                            .column(20, { page: 'current' }) // العمود الرابع
                             .data()
                             .reduce(function(a, b) {
                                 return intVal(a) + intVal(b);
                             }, 0);
                         // total_bed 17
                         var total_bed_sum = api
-                            .column(17, { page: 'current' }) // العمود الرابع
+                            .column(21, { page: 'current' }) // العمود الرابع
                             .data()
                             .reduce(function(a, b) {
                                 return intVal(a) + intVal(b);
                             }, 0);
                         // total_private 18
                         var total_private_sum = api
-                            .column(18, { page: 'current' }) // العمود الرابع
+                            .column(22, { page: 'current' }) // العمود الرابع
                             .data()
                             .reduce(function(a, b) {
                                 return intVal(a) + intVal(b);
@@ -695,7 +802,7 @@
                 $('.filter-apply-btn').on('click', function() {
                     let target = $(this).data('target');
                     let field = $(this).data('field');
-                    var filterValue = $("input[name="+ field + "]").val();
+                    var filterValue = $("input[name="+ field + "], select[name="+ field + "]").val();
                     console.log(filterValue,'2');
                     if(filterValue == '000'){
                         const fieldNull = $('#fieldNull').val(field);
@@ -822,7 +929,7 @@
                 $(document).on('click', '#filterBtnClear', function() {
                     $('.filter-dropdown').slideUp();
                     $('#filterBtn').text('تصفية');
-                    $('.filterDropdownMenu input').val('');
+                    $('.filterDropdownMenu input, .filterDropdownMenu select').val('');
                     $('th input[type="checkbox"]').prop('checked', false);
                     table.columns().search('').draw(); // إعادة رسم الجدول بدون فلاتر
                 });
@@ -850,6 +957,10 @@
                     private: '',
                     notes: '',
                     notes_2: '',
+                    displacement_status: '',
+                    income_status: '',
+                    family_burden: '',
+                    distributed: '',
                     user_name: '',
                     user_id: '',
                     user : '',
@@ -878,6 +989,10 @@
                             record.private = response.private;
                             record.notes = response.notes;
                             record.notes_2 = response.notes_2;
+                            record.displacement_status = response.displacement_status;
+                            record.income_status = response.income_status;
+                            record.family_burden = response.family_burden;
+                            record.distributed = response.distributed === null ? '' : (response.distributed ? '1' : '0');
                             record.file = response.file;
                             record.user_name = response.user_name;
                             record.user_id = response.user_id;

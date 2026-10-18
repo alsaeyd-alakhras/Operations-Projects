@@ -10,6 +10,7 @@ use App\Models\Record;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Mccarlosen\LaravelMpdf\Facades\LaravelMpdf as PDF;
 use Yajra\DataTables\Facades\DataTables;
@@ -47,6 +48,10 @@ class RecordController extends Controller
                             return $financier->name;
                         }
                     })
+                    ->addColumn('displacement_status_label', fn ($record) => $record->displacement_status_label)
+                    ->addColumn('income_status_label', fn ($record) => $record->income_status_label)
+                    ->addColumn('family_burden_label', fn ($record) => $record->family_burden_label)
+                    ->addColumn('distributed_label', fn ($record) => $record->distributed_label)
                     ->addColumn('edit', function ($record) {
                         return $record->id;
                     })
@@ -111,6 +116,10 @@ class RecordController extends Controller
                             return $financier->name;
                         }
                     })
+                    ->addColumn('displacement_status_label', fn ($record) => $record->displacement_status_label)
+                    ->addColumn('income_status_label', fn ($record) => $record->income_status_label)
+                    ->addColumn('family_burden_label', fn ($record) => $record->family_burden_label)
+                    ->addColumn('distributed_label', fn ($record) => $record->distributed_label)
                     ->addColumn('edit', function ($record) {
                         return $record->id;
                     })
@@ -151,6 +160,7 @@ class RecordController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Record::class);
+        $this->normalizeSocialFields($request);
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date',
@@ -160,6 +170,7 @@ class RecordController extends Controller
             'operation' => 'required',
             'doctor' => 'required',
             'amount' => 'required',
+            ...$this->socialFieldRules(),
         ]);
 
         $request->merge([
@@ -198,6 +209,7 @@ class RecordController extends Controller
     {
         $this->authorize('update', Record::class);
 
+        $this->normalizeSocialFields($request);
         $request->validate([
             'name' => 'required|string',
             'date' => 'required|date',
@@ -207,6 +219,7 @@ class RecordController extends Controller
             'operation' => 'required',
             'doctor' => 'required',
             'amount' => 'required',
+            ...$this->socialFieldRules(),
         ]);
         $request->merge([
             'done' => $request->done ? 1 : 0,
@@ -302,5 +315,22 @@ class RecordController extends Controller
             ]);
             return $pdf->stream();
         }
+    }
+
+    private function socialFieldRules(): array
+    {
+        return [
+            'displacement_status' => ['nullable', Rule::in(array_keys(Record::DISPLACEMENT_STATUSES))],
+            'income_status' => ['nullable', Rule::in(array_keys(Record::INCOME_STATUSES))],
+            'family_burden' => ['nullable', Rule::in(array_keys(Record::FAMILY_BURDENS))],
+            'distributed' => ['nullable', 'boolean'],
+        ];
+    }
+
+    private function normalizeSocialFields(Request $request): void
+    {
+        $request->merge(collect(['displacement_status', 'income_status', 'family_burden', 'distributed'])
+            ->mapWithKeys(fn ($field) => [$field => $request->input($field) === '' ? null : $request->input($field)])
+            ->all());
     }
 }

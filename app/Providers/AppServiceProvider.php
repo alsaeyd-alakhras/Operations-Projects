@@ -26,11 +26,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
 
-        $baseUrl = request()->getSchemeAndHttpHost();
-        config([
-            'app.url' => $baseUrl,
-            'app.asset_url' => $baseUrl . '/public/'
-        ]);
+        if (app()->isProduction()) {
+            $baseUrl = request()->getSchemeAndHttpHost();
+            config([
+                'app.url' => $baseUrl,
+                'app.asset_url' => $baseUrl . '/public/'
+            ]);
+        }
 
 
         Paginator::useBootstrapFive();

@@ -88,7 +88,7 @@
         <table class="blueTable">
             <thead>
                 <tr>
-                    <td colspan="13" style="border:0;">
+                    <td colspan="17" style="border:0;">
                         <p>
                             <span>مستشفى يافا الطبي</span> /
                             <span>مشروع إجراء عمليات جراحية وتدخلات طبية</span>
@@ -96,7 +96,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="13" align="center" style="color: #000;border:0;">
+                    <td colspan="17" align="center" style="color: #000;border:0;">
                         <h1>مشروع العمليات الطبية - حسابي</h1>
                     </td>
                 </tr>
@@ -106,6 +106,10 @@
                     <th style="white-space: nowrap;">الاسم</th>
                     <th>رقم الممول</th>
                     <th>العمر</th>
+                    <th>حالة النزوح والسكن وتضرر البيت</th>
+                    <th>مصادر الدخل والوضع المالي</th>
+                    <th>حجم الأسرة والحالات الخاصة</th>
+                    <th>تم التوزيع</th>
                     <th style="white-space: nowrap;">العملية</th>
                     <th style="white-space: nowrap;">الطبيب</th>
                     <th style="white-space: nowrap;">طبيب التخدير</th>
@@ -124,6 +128,10 @@
                     <td style="white-space: nowrap;">{{ $record['name'] }}</td>  <!-- الاسم -->
                     <td>{{ $record['financier_number'] }}</td>  <!-- رقم التمويل -->
                     <td>{{ $record['age'] }}</td>  <!-- العمر -->
+                    <td>{{ \App\Models\Record::DISPLACEMENT_STATUSES[$record['displacement_status'] ?? null] ?? '' }}</td>
+                    <td>{{ \App\Models\Record::INCOME_STATUSES[$record['income_status'] ?? null] ?? '' }}</td>
+                    <td>{{ \App\Models\Record::FAMILY_BURDENS[$record['family_burden'] ?? null] ?? '' }}</td>
+                    <td>{{ array_key_exists('distributed', $record) && !is_null($record['distributed']) ? ($record['distributed'] ? 'نعم' : 'لا') : '' }}</td>
                     <td style="white-space: nowrap;">{{ $record['operation'] }}</td>  <!-- العملية -->
                     <td style="white-space: nowrap;">{{ $record['doctor'] }}</td>  <!-- الطبيب -->
                     <td style="white-space: nowrap;">{{ $record['anesthesia'] }}</td>  <!-- التخدير -->
@@ -138,7 +146,7 @@
             <tfoot>
                 <tr>
                     <td>00</td>
-                    <td colspan="7">المجموع</td>  <!-- التاريخ -->
+                    <td colspan="11">المجموع</td>  <!-- التاريخ -->
                     <td>{{ number_format($recordsTotalArray['amount']) }}</td>  <!-- المبلغ -->
                     <td>{{ number_format($recordsTotalArray['doctor_share']) }}</td>  <!-- حصة الطبيب -->
                     <td>{{ number_format($recordsTotalArray['anesthesiologists_share']) }}</td>  <!-- حصة الأطباء المساعدين -->

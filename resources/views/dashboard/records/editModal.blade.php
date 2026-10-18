@@ -35,6 +35,41 @@
     <div class="form-group col-md-3">
         <x-form.input name="address" label="العنوان" />
     </div>
+    <div class="form-group col-md-6">
+        <label for="displacement_status">حالة النزوح والسكن وتضرر البيت</label>
+        <select name="displacement_status" id="displacement_status" class="form-control form-control-alternative">
+            <option value=""></option>
+            @foreach (\App\Models\Record::DISPLACEMENT_STATUSES as $key => $label)
+                <option value="{{ $key }}">{{ $label }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="form-group col-md-6">
+        <label for="income_status">مصادر الدخل والوضع المالي</label>
+        <select name="income_status" id="income_status" class="form-control form-control-alternative">
+            <option value=""></option>
+            @foreach (\App\Models\Record::INCOME_STATUSES as $key => $label)
+                <option value="{{ $key }}">{{ $label }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="form-group col-md-3">
+        <label for="family_burden">حجم الأسرة والحالات الخاصة</label>
+        <select name="family_burden" id="family_burden" class="form-control form-control-alternative">
+            <option value=""></option>
+            @foreach (\App\Models\Record::FAMILY_BURDENS as $key => $label)
+                <option value="{{ $key }}">{{ $label }}</option>
+            @endforeach
+        </select>
+    </div>
+    <div class="form-group col-md-3">
+        <label for="distributed">تم التوزيع</label>
+        <select name="distributed" id="distributed" class="form-control form-control-alternative">
+            <option value=""></option>
+            <option value="1">نعم</option>
+            <option value="0">لا</option>
+        </select>
+    </div>
     <div class="form-group col-md-3">
         <x-form.input name="phone_number1" maxlength="10" label="جوال 1" required />
     </div>
