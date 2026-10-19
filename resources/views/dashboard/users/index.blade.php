@@ -1,95 +1,93 @@
 <x-front-layout classC="shadow p-3 mb-5 bg-white rounded ">
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <div class="row align-items-center mb-2">
-                <div class="col">
-                    <h2 class="mb-2 page-title">جدول المستخدمين</h2>
-                    <p class="card-text">هنا يتم عرض بيانات المستخدمين ويمكنك التحكم في صلاحياتهم كاملة</p>
-                </div>
-                <div class="col-auto">
-                    @can('create', 'App\\Models\User')
-                    <a class="btn btn-success" href="{{route('users.create')}}">
-                        <i class="fe fe-plus"></i>
-                    </a>
-                    @endcan
-                </div>
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('css/records.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/admin-pages.css') }}">
+        <script>
+            try { document.documentElement.classList.toggle('rec-dark', localStorage.getItem('mode') === 'dark'); } catch (e) {}
+        </script>
+        <style>
+            #user-1 { display: none; }
+        </style>
+    @endpush
+    <div class="adm-page">
+        <div class="adm-head">
+            <div>
+                <h2 class="adm-title page-title">جدول المستخدمين</h2>
+                <p class="adm-sub">هنا يتم عرض بيانات المستخدمين ويمكنك التحكم في صلاحياتهم كاملة</p>
             </div>
-            <div class="row my-4">
-                <!-- Small table -->
-                <div class="col-md-12">
-                    <div class="card shadow">
-                        <div class="card-body">
-                            <!-- table -->
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>حالة النشاط</th>
-                                        <th>الاسم</th>
-                                        <th>اسم المستخدم</th>
-                                        <th>البريد الالكتروني</th>
-                                        <th>الفرع</th>
-                                        <th>أخر موعد تواجد</th>
-                                        <th>الحدث</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <style>
-                                        #user-1{
-                                            display: none;
-                                        }
-                                    </style>
-                                    @foreach($users as $user)
-                                    <tr  id="user-{{$user->id}}">
-                                        <td>{{ $loop->iteration - 1 }}</td>
-                                        @if ($user->last_activity >= now()->subMinutes(5))
-                                            <td>
-                                                <i class="fe fe-circle text-success bg-success rounded-circle"></i>
-                                            </td>
-                                        @else
-                                            <td>
-                                                <i class="fe fe-circle"></i>
-                                            </td>
-                                        @endif
-                                        <td>{{$user->name}}</td>
-                                        <td>{{$user->username}}</td>
-                                        <td>{{$user->email}}</td>
-                                        <td>{{$user->branch?->name}}</td>
-                                        <td>{{$user->last_activity}}</td>
-                                        <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <span class="text-muted sr-only">Action</span>
-                                            </button>
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                                {{-- @can('view', 'App\\Models\User')
-                                                <a class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;"
-                                                href="{{route('users.show',$user->id)}}">عرض</a>
-                                                @endcan --}}
-                                                @can('update', 'App\\Models\User')
-                                                <a class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;"
-                                                    href="{{route('users.edit',$user->id)}}">تعديل</a>
-                                                @endcan
-                                                @can('delete', 'App\\Models\User')
-                                                <form action="{{route('users.destroy',$user->id)}}" method="post">
-                                                    @csrf
-                                                    @method('delete')
-                                                    <button type="submit" class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;"
-                                                    href="#">حذف</button>
-                                                </form>
-                                                @endcan
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                            <div>
-                                {{$users->links()}}
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- simple table -->
-            </div> <!-- end section -->
-        </div> <!-- .col-12 -->
-    </div> <!-- .row -->
+            <div class="adm-actions">
+                @can('create', 'App\\Models\User')
+                <a class="rec-btn rec-btn--primary" href="{{ route('users.create') }}">
+                    <i class="fe fe-plus"></i> إضافة مستخدم
+                </a>
+                @endcan
+            </div>
+        </div>
+
+        <div class="adm-card">
+            <div class="adm-scroll">
+                <table class="table adm-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>حالة النشاط</th>
+                            <th>الاسم</th>
+                            <th>اسم المستخدم</th>
+                            <th>البريد الالكتروني</th>
+                            <th>الفرع</th>
+                            <th>أخر موعد تواجد</th>
+                            <th class="adm-flag-cell">الحدث</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($users as $user)
+                        <tr id="user-{{ $user->id }}">
+                            <td class="adm-idx">{{ $loop->iteration - 1 }}</td>
+                            <td>
+                                @if ($user->last_activity >= now()->subMinutes(5))
+                                    <span class="adm-status adm-status--on">متصل</span>
+                                @else
+                                    <span class="adm-status">غير متصل</span>
+                                @endif
+                            </td>
+                            <td class="adm-name">{{ $user->name }}</td>
+                            <td>{{ $user->username }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td>{{ $user->branch?->name }}</td>
+                            <td class="adm-num">{{ $user->last_activity }}</td>
+                            <td class="adm-act">
+                                <div class="dropdown">
+                                    <button class="adm-more" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="إجراءات المستخدم {{ $user->name }}">
+                                        <i class="fe fe-more-horizontal"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right rec-menu">
+                                        @can('update', 'App\\Models\User')
+                                        <a class="dropdown-item" href="{{ route('users.edit', $user->id) }}"><i class="fe fe-edit"></i> تعديل</a>
+                                        @endcan
+                                        @can('delete', 'App\\Models\User')
+                                        <form action="{{ route('users.destroy', $user->id) }}" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا المستخدم؟');">
+                                            @csrf
+                                            @method('delete')
+                                            <button type="submit" class="dropdown-item dropdown-item--danger"><i class="fe fe-trash"></i> حذف</button>
+                                        </form>
+                                        @endcan
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="8" class="adm-empty">لا يوجد مستخدمون</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if ($users->hasPages())
+            <div class="adm-pager">
+                {{ $users->links() }}
+            </div>
+            @endif
+        </div>
+    </div>
 </x-front-layout>

@@ -1,64 +1,69 @@
 <x-front-layout classC="shadow p-3 mb-5 bg-white rounded ">
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <div class="row align-items-center mb-2">
-                <div class="col">
-                    <h2 class="mb-2 page-title">جدول الفروع</h2>
-                </div>
-                <div class="col-auto">
-                    @can('create', 'App\\Models\Branch')
-                    <a class="btn btn-success" href="{{route('branches.create')}}">
-                        <i class="fe fe-plus"></i>
-                    </a>
-                    @endcan
-                </div>
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('css/records.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/admin-pages.css') }}">
+        <script>
+            try { document.documentElement.classList.toggle('rec-dark', localStorage.getItem('mode') === 'dark'); } catch (e) {}
+        </script>
+    @endpush
+    <div class="adm-page">
+        <div class="adm-head">
+            <h2 class="adm-title page-title">جدول الفروع</h2>
+            <div class="adm-actions">
+                @can('create', 'App\\Models\Branch')
+                <a class="rec-btn rec-btn--primary" href="{{ route('branches.create') }}">
+                    <i class="fe fe-plus"></i> إضافة فرع
+                </a>
+                @endcan
             </div>
-            <div class="row my-4">
-                <div class="col-md-12">
-                    <div class="card shadow">
-                        <div class="card-body">
-                            <table class="table table-hover table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>اسم الفرع</th>
-                                        <th>عدد السجلات</th>
-                                        <th>عدد المستخدمين</th>
-                                        <th>الحدث</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($branches as $branch)
-                                    <tr>
-                                        <td>{{$loop->iteration}}</td>
-                                        <td>{{$branch->name}}</td>
-                                        <td>{{$branch->records_count}}</td>
-                                        <td>{{$branch->users_count}}</td>
-                                        <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <span class="text-muted sr-only">Action</span>
-                                            </button>
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                                @can('update', 'App\\Models\Branch')
-                                                <a class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;"
-                                                    href="{{route('branches.edit',$branch->id)}}">تعديل</a>
-                                                @endcan
-                                                @can('delete', 'App\\Models\Branch')
-                                                <form action="{{route('branches.destroy',$branch->id)}}" method="post">
-                                                    @csrf
-                                                    @method('delete')
-                                                    <button type="submit" class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;">حذف</button>
-                                                </form>
-                                                @endcan
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+        </div>
+
+        <div class="adm-card">
+            <div class="adm-scroll">
+                <table class="table adm-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>اسم الفرع</th>
+                            <th>عدد السجلات</th>
+                            <th>عدد المستخدمين</th>
+                            <th class="adm-flag-cell">الحدث</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($branches as $branch)
+                        <tr>
+                            <td class="adm-idx">{{ $loop->iteration }}</td>
+                            <td class="adm-name">{{ $branch->name }}</td>
+                            <td class="adm-num">{{ $branch->records_count }}</td>
+                            <td class="adm-num">{{ $branch->users_count }}</td>
+                            <td class="adm-act">
+                                <div class="dropdown">
+                                    <button class="adm-more" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="إجراءات الفرع {{ $branch->name }}">
+                                        <i class="fe fe-more-horizontal"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right rec-menu">
+                                        @can('update', 'App\\Models\Branch')
+                                        <a class="dropdown-item" href="{{ route('branches.edit', $branch->id) }}"><i class="fe fe-edit"></i> تعديل</a>
+                                        @endcan
+                                        @can('delete', 'App\\Models\Branch')
+                                        <form action="{{ route('branches.destroy', $branch->id) }}" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا الفرع؟');">
+                                            @csrf
+                                            @method('delete')
+                                            <button type="submit" class="dropdown-item dropdown-item--danger"><i class="fe fe-trash"></i> حذف</button>
+                                        </form>
+                                        @endcan
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="adm-empty">لا توجد فروع بعد</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

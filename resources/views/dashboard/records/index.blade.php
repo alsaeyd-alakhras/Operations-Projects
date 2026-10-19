@@ -11,54 +11,35 @@
         <link id="stickyTableDark" rel="stylesheet" href="{{ asset('css/stickyTableDark.css') }}" disabled>
         <link rel="stylesheet" href="{{ asset('css/style.css') }}">
         <link rel="stylesheet" href="{{ asset('css/datatableIndex.css') }}">
-        <style>
-            th{
-                color: #fff !important;
-            }
-        </style>
+        <link rel="stylesheet" href="{{ asset('css/records.css') }}">
     @endpush
     <x-slot:extra_nav>
-        @can('export','App\\Models\Record')
-        <li class="nav-item">
-            <button type="button" class="btn btn-info" id="print-report" title="طباعة تقرير">
-                <i class="fe fe-printer"></i> PDF
-            </button>
-        </li>
-        @endcan
-        @can('exportexcel','App\\Models\Record')
-        <li class="nav-item">
-            <button type="button" class="btn btn-success text-white" id="excel-export" title="تصدير excel">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="16" height="16">
-                    <path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM155.7 250.2L192 302.1l36.3-51.9c7.6-10.9 22.6-13.5 33.4-5.9s13.5 22.6 5.9 33.4L221.3 344l46.4 66.2c7.6 10.9 5 25.8-5.9 33.4s-25.8 5-33.4-5.9L192 385.8l-36.3 51.9c-7.6 10.9-22.6 13.5-33.4 5.9s-13.5-22.6-5.9-33.4L162.7 344l-46.4-66.2c-7.6-10.9-5-25.8 5.9-33.4s25.8-5 33.4 5.9z"/>
-                </svg>
-            </button>
-        </li>
-        @endcan
-        @can('create', 'App\\Models\Record')
+        @can('create','App\\Models\Record')
         @if (!auth()->user()->isBranchUser())
-        <li class="nav-item">
-            <button type="button" class="btn btn-icon text-success my-2" id="createNew">
-                <i class="fe fe-plus fe-16"></i>
-            </button>
-        </li>
+        <li class="nav-item mx-1 d-flex align-items-center"><button type="button" class="rec-tool rec-tool--primary" id="createNew"><i class="fe fe-plus"></i> إضافة سجل</button></li>
         @endif
         @endcan
-        <li class="nav-item dropdown d-flex align-items-center justify-content-center mx-2">
-            <a class="nav-link dropdown-toggle text-white pr-0" href="#" id="navbarDropdownMenuLink"
-                role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="avatar avatar-sm mt-2">
-                    <i class="fe fe-filter fe-16"></i>
-                </span>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-                <button class="btn btn-nav" id="filterBtn">تصفية</button>
-                <button class="btn btn-nav" id="filterBtnClear">إزالة التصفية</button>
+        @canany(['export','exportexcel'],'App\\Models\Record')
+        <li class="nav-item dropdown mx-1 d-flex align-items-center">
+            <button class="rec-tool dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fe fe-download"></i> تصدير</button>
+            <div class="dropdown-menu dropdown-menu-right rec-menu">
+                @can('export','App\\Models\Record')
+                <button class="dropdown-item" id="print-report"><i class="fe fe-printer"></i> تقرير PDF</button>
+                @endcan
+                @can('exportexcel','App\\Models\Record')
+                <button class="dropdown-item" id="excel-export"><i class="fe fe-file-text"></i> ملف Excel</button>
+                @endcan
             </div>
         </li>
-        <li class="nav-item d-flex align-items-center justify-content-center mx-2">
-            <button type="button" class="btn" id="refreshData"><span class="fe fe-refresh-ccw fe-16 text-white"></span></button>
+        @endcanany
+        <li class="nav-item mx-1 d-flex align-items-center">
+            <button type="button" class="rec-tool" id="filterBtnClear"><i class="fe fe-x"></i> مسح الفلاتر</button>
+        </li>
+        <li class="nav-item mx-1 d-flex align-items-center">
+            <button type="button" class="rec-tool rec-tool--icon" id="refreshData" title="تحديث" aria-label="تحديث"><i class="fe fe-refresh-ccw"></i></button>
         </li>
     </x-slot:extra_nav>
+    <div class="records-page">
     <div class="row">
         <div class="col-md-12"  style="padding: 0 2px;">
             <div class="card">
@@ -528,21 +509,15 @@
     </div>
 
     <input type="hidden" name="fieldNull" id="fieldNull">
-    <!-- Fullscreen modal -->
-    <div class="modal fade modal-full" id="editRecord" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-        <button aria-label="" type="button" class="close px-2" data-dismiss="modal" aria-hidden="true">
-            <span aria-hidden="true">×</span>
-        </button>
-        <div class="modal-dialog modal-dialog-centered w-100" role="document" style="max-width: 95%;">
+    <div class="modal fade" id="editRecord" tabindex="-1" role="dialog" aria-labelledby="recordFormTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <div class="modal-body text-center">
-                    <form id="editForm" enctype="multipart/form-data">
-                        @include('dashboard.records.editModal')
-                    </form>
-                </div>
+                <form id="editForm" class="rec-form" enctype="multipart/form-data">
+                    @include('dashboard.records.editModal')
+                </form>
             </div>
         </div>
-    </div> <!-- small modal -->
+    </div>
 
     @can('import','App\\Models\Record')
     @if (!auth()->user()->isBranchUser())
@@ -621,6 +596,7 @@
             <button type="submit" class="btn btn-info">طباعة</button>
         </div>
     </form>
+    </div>
 
     @push('scripts')
         <!-- DataTables JS -->
@@ -725,17 +701,22 @@
                         { data: 'displacement_status', name: 'displacement_status', orderable: false, render: function(data, type, row) { return row.displacement_status_label || ''; }},
                         { data: 'income_status', name: 'income_status', orderable: false, render: function(data, type, row) { return row.income_status_label || ''; }},
                         { data: 'family_burden', name: 'family_burden', orderable: false, render: function(data, type, row) { return row.family_burden_label || ''; }},
-                        { data: 'distributed', name: 'distributed', orderable: false, render: function(data, type, row) { return row.distributed_label || ''; }},
+                        { data: 'distributed', name: 'distributed', orderable: false, render: function(data, type, row) {
+                            if (type === 'display') {
+                                return row.distributed_label === 'نعم' ? '<span class="rec-chip rec-chip--yes">نعم</span>' : row.distributed_label === 'لا' ? '<span class="rec-chip rec-chip--no">لا</span>' : '';
+                            }
+                            return row.distributed_label || '';
+                        }},
                         { data: 'age', name: 'age', orderable: false},
                         { data: 'patient_ID', name: 'patient_ID'  , orderable: false},
                         { data: 'phone_number1', name: 'phone_number1'  , orderable: false},
                         { data: 'phone_number2', name: 'phone_number2'  , orderable: false},
                         { data: 'operation', name: 'operation'  , orderable: false},
                         { data: 'doctor', name: 'doctor', orderable: false},
-                        { data: 'amount', name: 'amount', orderable: false, render: function(data, type, row) {
+                        { data: 'amount', name: 'amount', orderable: false, className: 'rec-num', render: function(data, type, row) {
                             return  formatNumber(data,2);
                         }},
-                        { data: 'doctor_share', name: 'doctor_share', orderable: false , render: function(data, type, row) {
+                        { data: 'doctor_share', name: 'doctor_share', orderable: false, className: 'rec-num', render: function(data, type, row) {
                             @can('financial','App\\Models\Record')
                             return  formatNumber(data,2);
                             @else
@@ -743,21 +724,21 @@
                             @endcan
                         }},
                         { data: 'anesthesia', name: 'anesthesia', orderable: false},
-                        { data: 'anesthesiologists_share', name: 'anesthesiologists_share', orderable: false, render: function(data, type, row) {
+                        { data: 'anesthesiologists_share', name: 'anesthesiologists_share', orderable: false, className: 'rec-num', render: function(data, type, row) {
                             @can('financial','App\\Models\Record')
                             return  formatNumber(data,2);
                             @else
                             return '';
                             @endcan
                         }},
-                        { data: 'bed', name: 'bed', orderable: false, render: function(data, type, row) {
+                        { data: 'bed', name: 'bed', orderable: false, className: 'rec-num', render: function(data, type, row) {
                             @can('financial','App\\Models\Record')
                             return  formatNumber(data,2);
                             @else
                             return '';
                             @endcan
                         }},
-                        { data: 'private', name: 'private', orderable: false, render: function(data, type, row) {
+                        { data: 'private', name: 'private', orderable: false, className: 'rec-num', render: function(data, type, row) {
                             @can('financial','App\\Models\Record')
                             return  formatNumber(data,2);
                             @else
@@ -1079,8 +1060,6 @@
                     table.ajax.reload();
                 });
                 $(document).on('click', '#filterBtnClear', function() {
-                    $('.filter-dropdown').slideUp();
-                    $('#filterBtn').text('تصفية');
                     $('.filterDropdownMenu input, .filterDropdownMenu select').val('');
                     $('th input[type="checkbox"]').prop('checked', false);
                     table.columns().search('').draw(); // إعادة رسم الجدول بدون فلاتر
@@ -1173,11 +1152,9 @@
                             });
                             $('#addRecord').remove();
                             $('#update').remove();
+                            $('#recordFormTitle').text('تعديل السجل');
                             $('#btns_form').append(`
-                                <button type="button" id="update" class="btn btn-primary mx-2">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    تعديل
-                                </button>
+                                <button type="button" id="update" class="btn rec-btn rec-btn--primary"><i class="fe fe-check"></i> حفظ التعديلات</button>
                             `);
                             $('.editForm').css('display','block');
                             $('#editRecord').modal('show');
@@ -1305,11 +1282,9 @@
                             });
                             $('#addRecord').remove();
                             $('#update').remove();
+                            $('#recordFormTitle').text('إضافة سجل جديد');
                             $('#btns_form').append(`
-                                <button type="button" id="addRecord" class="btn btn-primary mx-2">
-                                    <i class="fe fe-plus"></i>
-                                    أضف
-                                </button>
+                                <button type="button" id="addRecord" class="btn rec-btn rec-btn--primary"><i class="fe fe-plus"></i> إضافة السجل</button>
                             `);
                             $('.editForm').css('display','none');
                             $('#editRecord').modal('show');
@@ -1393,15 +1368,7 @@
         </script>
         <script>
             $(document).ready(function() {
-                $(document).on('click', '#filterBtn', function() {
-                    let text = $(this).text();
-                    if (text != 'تصفية') {
-                        $(this).text('تصفية');
-                    }else{
-                        $(this).text('إخفاء التصفية');
-                    }
-                    $('.filter-dropdown').slideToggle();
-                });
+                document.documentElement.classList.toggle('rec-dark', curentTheme === 'dark');
                 if (curentTheme == "light") {
                     $('#stickyTableLight').prop('disabled', false); // تشغيل النمط Light
                     $('#stickyTableDark').prop('disabled', true);  // تعطيل النمط Dark

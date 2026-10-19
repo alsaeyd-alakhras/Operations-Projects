@@ -1,160 +1,120 @@
 <x-front-layout classC="shadow p-3 mb-5 bg-white rounded ">
-    <div class="row justify-content-center">
-        <div class="col-12">
-            <div class="row align-items-center mb-2">
-                <div class="col">
-                    <h2 class="mb-2 page-title">جدول الممولين - {{ $archiveEnable == true ? 'الأرشيف' : '' }}</h2>
-                </div>
-                <div class="col-auto d-flex justify-content-end align-items-center">
-                    @if($archiveEnable != true)
-                    <a class="btn btn-info mx-2" href="{{route('financiers.index',['archive' => 1])}}">
-                        الأرشيف
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('css/records.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/admin-pages.css') }}">
+        <script>
+            try { document.documentElement.classList.toggle('rec-dark', localStorage.getItem('mode') === 'dark'); } catch (e) {}
+        </script>
+    @endpush
+    <div class="adm-page">
+        <div class="adm-head">
+            <h2 class="adm-title page-title">جدول الممولين @if($archiveEnable == true)<small>الأرشيف</small>@endif</h2>
+            <div class="adm-actions">
+                @if($archiveEnable != true)
+                    <a class="rec-btn" href="{{ route('financiers.index', ['archive' => 1]) }}">
+                        <i class="fe fe-archive"></i> الأرشيف
                     </a>
-                    @can('create', 'App\\Models\Financier')
-                    <a class="btn btn-success mx-2" href="{{route('financiers.create')}}">
-                        <i class="fe fe-plus"></i>
-                    </a>
-                    @endcan
                     @can('print', 'App\\Models\Financier')
-                    <form action="{{route('financiers.print')}}" method="post" target="_blank">
+                    <form action="{{ route('financiers.print') }}" method="post" target="_blank">
                         @csrf
                         <input type="hidden" name="type" value="all">
-                        <button type="submit" class="btn btn-info">طباعة pdf</button>
+                        <button type="submit" class="rec-btn"><i class="fe fe-printer"></i> طباعة pdf</button>
                     </form>
                     @endcan
-                    @endif
-                </div>
+                    @can('create', 'App\\Models\Financier')
+                    <a class="rec-btn rec-btn--primary" href="{{ route('financiers.create') }}">
+                        <i class="fe fe-plus"></i> إضافة ممول
+                    </a>
+                    @endcan
+                @else
+                    <a class="rec-btn" href="{{ route('financiers.index') }}">
+                        <i class="fe fe-arrow-right"></i> العودة للممولين
+                    </a>
+                @endif
             </div>
-            <div class="row my-4">
-                <!-- Small table -->
-                <div class="col-md-12">
-                    <div class="card shadow">
-                        <div class="card-body">
-                            <!-- table -->
-                            <style>
-                                th,td{
-                                    color: #000 !important;
-                                    font-size: 16px !important;
-                                }
-                            </style>
-                            <table class="table table-hover table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>رقم الممول</th>
-                                        <th>الاسم</th>
-                                        <th>المرحلة</th>
-                                        <th>اسم المدير</th>
-                                        <th>الملبع ش</th>
-                                        <th>عدد الحالات</th>
-                                        <th class="text-center">إنتهاء <br> المشروع</th>
-                                        <th class="text-center">دفع <br> المشروع</th>
-                                        <th class="text-center">توزيع <br> المشروع</th>
-                                        <th class="text-center">أرشفة <br> المشروع</th>
-                                        <th>الحدث</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($financiers as $financier)
-                                    <tr >
-                                        <td>{{$loop->iteration}}</td>
-                                        <td>{{$financier->financier_number}}</td>
-                                        <td>{{$financier->name}}</td>
-                                        <td>{{$financier->stage}}</td>
-                                        <td>{{$financier->manager_name}}</td>
-                                        <td>{{$financier->amount_ils}}</td>
-                                        <td>{{$financier->number_cases}}</td>
-                                        <td class="text-center">
-                                            <div class="checkbox-wrapper-46">
-                                                <input type="checkbox" id="completion_project" name="completion_project" class="inp-cbx" @checked($financier->completion_project == 1) readonly />
-                                                <label class="cbx">
-                                                    <span>
-                                                        <svg viewBox="0 0 12 10" height="10px" width="12px">
-                                                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                                        </svg>
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="checkbox-wrapper-46">
-                                                <input type="checkbox" id="push_project" name="push_project" class="inp-cbx" @checked($financier->push_project == 1) readonly />
-                                                <label class="cbx">
-                                                    <span>
-                                                        <svg viewBox="0 0 12 10" height="10px" width="12px">
-                                                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                                        </svg>
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="checkbox-wrapper-46">
-                                                <input type="checkbox" id="project_distribution" name="project_distribution" class="inp-cbx" @checked($financier->project_distribution == 1) readonly />
-                                                <label class="cbx">
-                                                    <span>
-                                                        <svg viewBox="0 0 12 10" height="10px" width="12px">
-                                                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                                        </svg>
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="checkbox-wrapper-46">
-                                                <input type="checkbox" id="project_archive" name="project_archive" class="inp-cbx" @checked($financier->project_archive == 1) readonly />
-                                                <label class="cbx">
-                                                    <span>
-                                                        <svg viewBox="0 0 12 10" height="10px" width="12px">
-                                                            <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                                                        </svg>
-                                                    </span>
-                                                </label>
-                                            </div>
-                                        </td>
-                                        <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <span class="text-muted sr-only">Action</span>
+        </div>
+
+        <div class="adm-card">
+            <div class="adm-scroll">
+                <table class="table adm-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>رقم الممول</th>
+                            <th>الاسم</th>
+                            <th>المرحلة</th>
+                            <th>اسم المدير</th>
+                            <th>المبلغ ش</th>
+                            <th>عدد الحالات</th>
+                            <th class="adm-flag-cell">إنتهاء <br> المشروع</th>
+                            <th class="adm-flag-cell">دفع <br> المشروع</th>
+                            <th class="adm-flag-cell">توزيع <br> المشروع</th>
+                            <th class="adm-flag-cell">أرشفة <br> المشروع</th>
+                            <th class="adm-flag-cell">الحدث</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($financiers as $financier)
+                        <tr>
+                            <td class="adm-idx">{{ $loop->iteration }}</td>
+                            <td class="adm-num">{{ $financier->financier_number }}</td>
+                            <td class="adm-name">{{ $financier->name }}</td>
+                            <td>{{ $financier->stage }}</td>
+                            <td>{{ $financier->maneger_name }}</td>
+                            <td class="adm-num">{{ $financier->amount_ils !== null ? number_format($financier->amount_ils, 2) : '' }}</td>
+                            <td class="adm-num">{{ $financier->number_cases }}</td>
+                            @foreach (['completion_project', 'push_project', 'project_distribution', 'project_archive'] as $flag)
+                            <td class="adm-flag-cell">
+                                @if($financier->{$flag} == 1)
+                                    <span class="adm-flag adm-flag--on" title="نعم"><i class="fe fe-check"></i><span class="sr-only">نعم</span></span>
+                                @else
+                                    <span class="adm-flag" title="لا"><span class="sr-only">لا</span></span>
+                                @endif
+                            </td>
+                            @endforeach
+                            <td class="adm-act">
+                                <div class="dropdown">
+                                    <button class="adm-more" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="إجراءات الممول {{ $financier->name }}">
+                                        <i class="fe fe-more-horizontal"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right rec-menu">
+                                        @can('print', 'App\\Models\Financier')
+                                        <form action="{{ route('financiers.print') }}" method="post" target="_blank">
+                                            @csrf
+                                            <input type="hidden" name="type" value="single">
+                                            <input type="hidden" name="id" value="{{ $financier->id }}">
+                                            <button type="submit" class="dropdown-item"><i class="fe fe-printer"></i> طباعة</button>
+                                        </form>
+                                        @endcan
+                                        @can('update', 'App\\Models\Financier')
+                                        <a class="dropdown-item" href="{{ route('financiers.edit', $financier->id) }}"><i class="fe fe-edit"></i> تعديل</a>
+                                        @endcan
+                                        <form action="{{ route('financiers.archive') }}" method="post">
+                                            @csrf
+                                            <input type="hidden" name="id" value="{{ $financier->id }}">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fe fe-archive"></i> {{ $archiveEnable == true ? 'إستعادة' : 'أرشفة' }}
                                             </button>
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                                @can('print', 'App\\Models\Financier')
-                                                <form action="{{route('financiers.print')}}" method="post" target="_blank">
-                                                    @csrf
-                                                    <input type="hidden" name="type" value="single">
-                                                    <input type="hidden" name="id" value="{{$financier->id}}">
-                                                    <button type="submit" class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;"
-                                                    href="#">طباعة</button>
-                                                </form>
-                                                @endcan
-                                                @can('update', 'App\\Models\Financier')
-                                                <a class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;"
-                                                    href="{{route('financiers.edit',$financier->id)}}">تعديل</a>
-                                                @endcan
-                                                <form action="{{route('financiers.archive')}}" method="post">
-                                                    @csrf
-                                                    <input type="hidden" name="id" value="{{$financier->id}}">
-                                                    <button type="submit" class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;" href="#">
-                                                        {{ $archiveEnable == true ? 'إستعادة' : 'أرشفة' }}
-                                                    </button>
-                                                </form>
-                                                @can('delete', 'App\\Models\Financier')
-                                                <form action="{{route('financiers.destroy',$financier->id)}}" method="post">
-                                                    @csrf
-                                                    @method('delete')
-                                                    <button type="submit" class="dropdown-item" style="margin: 0.5rem -0.75rem; text-align: right;"
-                                                    href="#">حذف</button>
-                                                </form>
-                                                @endcan
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div> <!-- simple table -->
-            </div> <!-- end section -->
-        </div> <!-- .col-12 -->
-    </div> <!-- .row -->
+                                        </form>
+                                        @can('delete', 'App\\Models\Financier')
+                                        <form action="{{ route('financiers.destroy', $financier->id) }}" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا الممول؟');">
+                                            @csrf
+                                            @method('delete')
+                                            <button type="submit" class="dropdown-item dropdown-item--danger"><i class="fe fe-trash"></i> حذف</button>
+                                        </form>
+                                        @endcan
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="12" class="adm-empty">{{ $archiveEnable == true ? 'لا يوجد ممولون في الأرشيف' : 'لا يوجد ممولون بعد' }}</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </x-front-layout>
