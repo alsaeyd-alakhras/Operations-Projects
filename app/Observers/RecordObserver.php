@@ -26,9 +26,11 @@ class RecordObserver
      */
     public function updated(Record $record): void
     {
+        $changes = array_values(array_diff(array_keys($record->getChanges()), ['updated_at']));
+        $isBranchUpdate = !empty($changes) && empty(array_diff($changes, ['eligible', 'branch_notes']));
         Logs::create([
             'type' => 'update',
-            'message' => 'تم  تعديل بيانات مريض : ' . $record->name,
+            'message' => $isBranchUpdate ? 'تم تحديث استحقاق/ملاحظات الفرع لمريض' : 'تم  تعديل بيانات مريض : ' . $record->name,
             'user_id' => Auth::user()->id,
             'user_name' => Auth::user()->name,
         ]);

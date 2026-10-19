@@ -28,6 +28,7 @@
                                         <th>الاسم</th>
                                         <th>اسم المستخدم</th>
                                         <th>البريد الالكتروني</th>
+                                        <th>الفرع</th>
                                         <th>أخر موعد تواجد</th>
                                         <th>الحدث</th>
                                     </tr>
@@ -53,6 +54,7 @@
                                         <td>{{$user->name}}</td>
                                         <td>{{$user->username}}</td>
                                         <td>{{$user->email}}</td>
+                                        <td>{{$user->branch?->name}}</td>
                                         <td>{{$user->last_activity}}</td>
                                         <td><button class="btn btn-sm dropdown-toggle more-horizontal" type="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

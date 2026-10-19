@@ -32,6 +32,15 @@
     </div>
     @endif
 
+    <div class="form-group p-3 col-4">
+        <label for="branch_id">الفرع</label>
+        <select name="branch_id" id="branch_id" class="form-control">
+            <option value="">بدون فرع (مستخدم عادي)</option>
+            @foreach (\App\Models\Branch::orderBy('name')->get() as $branch)
+                <option value="{{ $branch->id }}" @selected(old('branch_id', $user->branch_id) == $branch->id)>{{ $branch->name }}</option>
+            @endforeach
+        </select>
+    </div>
 </div>
 <div class="row ml-3">
     <fieldset id="user-roles" class="col-12">

@@ -52,6 +52,8 @@ class RecordController extends Controller
                     ->addColumn('income_status_label', fn ($record) => $record->income_status_label)
                     ->addColumn('family_burden_label', fn ($record) => $record->family_burden_label)
                     ->addColumn('distributed_label', fn ($record) => $record->distributed_label)
+                    ->addColumn('branch_name', fn ($record) => $record->branch?->name)
+                    ->addColumn('eligible_label', fn ($record) => $record->eligible_label)
                     ->addColumn('edit', function ($record) {
                         return $record->id;
                     })
@@ -76,8 +78,9 @@ class RecordController extends Controller
 
     public function archivedRow(Request $request){
         $this->authorize('view', Record::class);
+        $this->denyBranchUser($request);
         if($request->ajax()) {
-            $record = Record::find($request->id);
+            $record = Record::findOrFail($request->id);
             $type = $request->type;
             if($type == 'restore') {
                 $record->archived = 0;
@@ -120,6 +123,8 @@ class RecordController extends Controller
                     ->addColumn('income_status_label', fn ($record) => $record->income_status_label)
                     ->addColumn('family_burden_label', fn ($record) => $record->family_burden_label)
                     ->addColumn('distributed_label', fn ($record) => $record->distributed_label)
+                    ->addColumn('branch_name', fn ($record) => $record->branch?->name)
+                    ->addColumn('eligible_label', fn ($record) => $record->eligible_label)
                     ->addColumn('edit', function ($record) {
                         return $record->id;
                     })
@@ -145,6 +150,7 @@ class RecordController extends Controller
     public function create(Request $request)
     {
         $this->authorize('create', Record::class);
+        $this->denyBranchUser($request);
         $record = new Record();
         if($request->ajax()) {
             $record->date = Carbon::now()->format('Y-m-d');
@@ -160,6 +166,7 @@ class RecordController extends Controller
     public function store(Request $request)
     {
         $this->authorize('create', Record::class);
+        $this->denyBranchUser($request);
         $this->normalizeSocialFields($request);
         $request->validate([
             'name' => 'required|string',
@@ -178,7 +185,7 @@ class RecordController extends Controller
             'user_id' => $request->user()->id,
             'user_name' => $request->user()->name
         ]);
-        Record::create($request->all());
+        Record::create($request->except(['eligible', 'branch_notes']));
         if($request->ajax()) {
             return response()->json(['message' => 'تم الإضافة بنجاح']);
         }
@@ -209,6 +216,19 @@ class RecordController extends Controller
     {
         $this->authorize('update', Record::class);
 
+        // يوزر الفرع: يعدّل "يستحق" وملاحظات الفرع فقط، وأي حقل آخر يُتجاهل
+        if ($request->user()->isBranchUser()) {
+            $data = $request->validate([
+                'eligible' => ['nullable', 'boolean'],
+                'branch_notes' => ['nullable', 'string', 'max:2000'],
+            ]);
+            $data['eligible'] = $request->input('eligible') === '' ? null : $request->input('eligible');
+            $record->update($data);
+            return $request->ajax()
+                ? response()->json(['message' => 'تم التحديث بنجاح'])
+                : redirect()->route('records.index')->with('success', 'تم تعديل بيانات المريض');
+        }
+
         $this->normalizeSocialFields($request);
         $request->validate([
             'name' => 'required|string',
@@ -224,7 +244,7 @@ class RecordController extends Controller
         $request->merge([
             'done' => $request->done ? 1 : 0,
         ]);
-        $record->update($request->all());
+        $record->update($request->except(['eligible', 'branch_notes']));
         if($request->ajax()) {
             return response()->json(['message' => 'تم التحديث بنجاح']);
         }
@@ -237,6 +257,7 @@ class RecordController extends Controller
     public function destroy(Request $request, $id)
     {
         $this->authorize('delete', Record::class);
+        $this->denyBranchUser($request);
         $record = Record::findOrFail($id);
         $record->delete();
         if($request->ajax()) {
@@ -249,6 +270,7 @@ class RecordController extends Controller
     public function import(Request $request)
     {
         $this->authorize('import', Record::class);
+        $this->denyBranchUser($request);
         $file = $request->file('file');
         if (!$file) {
             return redirect()->back()->with('error', 'Please select a file to upload.');
@@ -324,12 +346,18 @@ class RecordController extends Controller
             'income_status' => ['nullable', Rule::in(array_keys(Record::INCOME_STATUSES))],
             'family_burden' => ['nullable', Rule::in(array_keys(Record::FAMILY_BURDENS))],
             'distributed' => ['nullable', 'boolean'],
+            'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
         ];
+    }
+
+    private function denyBranchUser(Request $request): void
+    {
+        abort_if($request->user()->isBranchUser(), 403);
     }
 
     private function normalizeSocialFields(Request $request): void
     {
-        $request->merge(collect(['displacement_status', 'income_status', 'family_burden', 'distributed'])
+        $request->merge(collect(['displacement_status', 'income_status', 'family_burden', 'distributed', 'branch_id'])
             ->mapWithKeys(fn ($field) => [$field => $request->input($field) === '' ? null : $request->input($field)])
             ->all());
     }

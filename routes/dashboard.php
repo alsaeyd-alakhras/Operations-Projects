@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BranchController;
 use App\Http\Controllers\FinancierController;
 use App\Http\Controllers\LogsController;
 use App\Http\Controllers\RecordController;
@@ -31,6 +32,7 @@ Route::group([
     Route::resources([
         'records' => RecordController::class,
         'financiers' => FinancierController::class,
-        'users' => UserController::class
+        'users' => UserController::class,
+        'branches' => BranchController::class,
     ]);
 });

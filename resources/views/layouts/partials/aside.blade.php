@@ -45,6 +45,14 @@
                 </a>
             </li>
             @endcan
+            @can('view','App\\Models\Branch')
+            <li class="nav-item w-100">
+                <a class="nav-link" href="{{route('branches.index')}}">
+                    <i class="fe fe-map-pin fe-16"></i>
+                    <span class="ml-3 item-text">الفروع</span>
+                </a>
+            </li>
+            @endcan
             @can('view','App\\Models\Logs')
             <li class="nav-item w-100">
                 <a class="nav-link" href="{{route('logs.index')}}">

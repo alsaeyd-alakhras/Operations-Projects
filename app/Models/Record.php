@@ -4,7 +4,10 @@ namespace App\Models;
 
 use App\Observers\RecordObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 class Record extends Model
 {
@@ -55,11 +58,25 @@ class Record extends Model
         'income_status',
         'family_burden',
         'distributed',
+        'branch_id',
+        'eligible',
+        'branch_notes',
     ];
 
     protected $casts = [
         'distributed' => 'boolean',
+        'eligible' => 'boolean',
     ];
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function getEligibleLabelAttribute(): string
+    {
+        return is_null($this->eligible) ? 'لم يُحدد' : ($this->eligible ? 'نعم' : 'لا');
+    }
 
     public function getDisplacementStatusLabelAttribute(): ?string
     {
@@ -84,6 +101,14 @@ class Record extends Model
     protected static function boot()
     {
         parent::boot();
+
+        // يوزر الفرع يرى سجلات فرعه فقط
+        static::addGlobalScope('branch', function (Builder $query) {
+            $user = Auth::user();
+            if ($user && $user->branch_id) {
+                $query->where($query->getModel()->getTable() . '.branch_id', $user->branch_id);
+            }
+        });
 
         // تسجيل الـ Observer
         static::observe(RecordObserver::class);

@@ -38,6 +38,9 @@ class RecordFactory extends Factory
             'income_status' => $this->faker->randomElement(array_keys(\App\Models\Record::INCOME_STATUSES)),
             'family_burden' => $this->faker->randomElement(array_keys(\App\Models\Record::FAMILY_BURDENS)),
             'distributed' => $this->faker->boolean(),
+            'branch_id' => null,
+            'eligible' => null,
+            'branch_notes' => null,
             'user_id' => 1,
             'user_name' => 'saeyd_jamal',
         ];

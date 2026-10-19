@@ -35,11 +35,13 @@
         </li>
         @endcan
         @can('create', 'App\\Models\Record')
+        @if (!auth()->user()->isBranchUser())
         <li class="nav-item">
             <button type="button" class="btn btn-icon text-success my-2" id="createNew">
                 <i class="fe fe-plus fe-16"></i>
             </button>
         </li>
+        @endif
         @endcan
         <li class="nav-item dropdown d-flex align-items-center justify-content-center mx-2">
             <a class="nav-link dropdown-toggle text-white pr-0" href="#" id="navbarDropdownMenuLink"
@@ -441,6 +443,9 @@
                                 <th @cannot('financial','App\\Models\Record') class="d-none" @endcan>خاص</th>
                                 <th>ملاحظات</th>
                                 <th>ملاحظات ثانوية</th>
+                                <th>الفرع</th>
+                                <th>يستحق</th>
+                                <th>ملاحظات الفرع</th>
                                 <th>
                                     <div class='d-flex align-items-center justify-content-between'>
                                         <span>المستخدم</span>
@@ -510,6 +515,9 @@
                                 <td></td>
                                 <td></td>
                                 <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
 
                             </tr>
                         </tfoot>
@@ -537,6 +545,7 @@
     </div> <!-- small modal -->
 
     @can('import','App\\Models\Record')
+    @if (!auth()->user()->isBranchUser())
     <div class="modal fade" id="importExcel" tabindex="-1" role="dialog" aria-labelledby="importExcelTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -568,6 +577,7 @@
             </div>
         </div>
     </div>
+    @endif
     @endcan
 
     <div class="modal fade" id="printReport" tabindex="-1" role="dialog" aria-labelledby="printReportTitle" aria-hidden="true">
@@ -627,8 +637,10 @@
         <script src="{{asset('js/jquery.validate.min.js')}}"></script>
         <script type="text/javascript">
             $(document).ready(function() {
+                const isBranchUser = @json(auth()->user()->isBranchUser());
                 $.validator.messages.required = "هذا الحقل مطلوب";
                 $("#editForm").validate({
+                    ignore: ':hidden, :disabled',
                     rules: {
                         name: {
                             required: true,
@@ -754,8 +766,12 @@
                         }},
                         { data: 'notes', name: 'notes'  , orderable: false},
                         { data: 'notes_2', name: 'notes_2'  , orderable: false},
+                        { data: 'branch_name', name: 'branch_name', orderable: false},
+                        { data: 'eligible_label', name: 'eligible_label', orderable: false},
+                        { data: 'branch_notes', name: 'branch_notes', orderable: false},
                         { data: 'user_name', name: 'user_name'  , orderable: false},
                         { data: 'archived', name: 'archived', orderable: false, render: function(data, type, row) {
+                            if (isBranchUser) return '';
                             @can('archived','App\\Models\Record')
                                 let link = `<button class="btn btn-sm btn-icon text-primary archived_row"  data-id=":record"><i class="fe fe-archive"></i></button>`.replace(':record', data);
                                 return link ;
@@ -764,6 +780,7 @@
                             @endcan
                         }},
                         {data: 'delete', name: 'delete', orderable: false, searchable: false, render: function (data, type, row) {
+                                if (isBranchUser) return '';
                                 @can('delete','App\\Models\Record')
                                 return `
                                     <button
@@ -1083,6 +1100,9 @@
                     income_status: '',
                     family_burden: '',
                     distributed: '',
+                    branch_id: '',
+                    eligible: '',
+                    branch_notes: '',
                     age: '',
                     patient_ID: '',
                     phone_number1: '',
@@ -1116,6 +1136,9 @@
                             record.income_status = response.income_status;
                             record.family_burden = response.family_burden;
                             record.distributed = response.distributed === null ? '' : (response.distributed ? '1' : '0');
+                            record.branch_id = response.branch_id === null ? '' : response.branch_id;
+                            record.eligible = response.eligible === null ? '' : (response.eligible ? '1' : '0');
+                            record.branch_notes = response.branch_notes === null ? '' : response.branch_notes;
                             record.age = response.age;
                             record.patient_ID = response.patient_ID;
                             record.phone_number1 = response.phone_number1;
@@ -1208,13 +1231,20 @@
                                 record[key] = input.val();
                             }
                         });
+                        let data = { ...record };
+                        if (isBranchUser) {
+                            data = { eligible: record.eligible, branch_notes: record.branch_notes };
+                        } else {
+                            delete data.eligible;
+                            delete data.branch_notes;
+                        }
                         $.ajax({
                             url: "{{ route('records.update', ':id') }}".replace(':id', record.id),
                             method: 'PUT',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            data: record,
+                            data: data,
                             success: function (response) {
                                 $('#editRecord').modal('hide');
                                 table.ajax.reload();
@@ -1247,6 +1277,9 @@
                             record.income_status = response.income_status;
                             record.family_burden = response.family_burden;
                             record.distributed = response.distributed === null ? '' : (response.distributed ? '1' : '0');
+                            record.branch_id = response.branch_id === null ? '' : response.branch_id;
+                            record.eligible = response.eligible === null ? '' : (response.eligible ? '1' : '0');
+                            record.branch_notes = response.branch_notes === null ? '' : response.branch_notes;
                             record.age = response.age;
                             record.patient_ID = response.patient_ID;
                             record.phone_number1 = response.phone_number1;

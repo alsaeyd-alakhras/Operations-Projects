@@ -19,7 +19,7 @@ class UserController extends Controller
     public function index()
     {
         $this->authorize('view', User::class);
-        $users = User::paginate(10);
+        $users = User::with('branch')->paginate(10);
         return view('dashboard.users.index', compact('users'));
     }
 
@@ -43,6 +43,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required',
             'username' => 'required|string|unique:users,username',
+            'branch_id' => 'nullable|exists:branches,id',
             'password' => 'required|same:confirm_password',
             'confirm_password' => 'required|same:password',
         ],[
@@ -51,8 +52,8 @@ class UserController extends Controller
         ]);
         DB::beginTransaction();
         try{
-            $user = User::create($request->all());
-            foreach ($request->abilities as $role) {
+            $user = User::create(array_merge($request->all(), ['branch_id' => $request->branch_id ?: null]));
+            foreach ($request->abilities ?? [] as $role) {
                 RoleUser::create([
                     'role_name' => $role,
                     'user_id' => $user->id,
@@ -94,6 +95,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required',
             'username' => 'required|string|unique:users,username,'.$user->id,
+            'branch_id' => 'nullable|exists:branches,id',
         ]);
         DB::beginTransaction();
         try{
@@ -104,6 +106,7 @@ class UserController extends Controller
                 'name' => $request->name,
                 'username' => $request->username,
                 'email' => $request->email,
+                'branch_id' => $request->branch_id ?: null,
             ]);
             if ($request->abilities != null) {
                 $role_old = RoleUser::where('user_id', $user->id)->pluck('role_name')->toArray();

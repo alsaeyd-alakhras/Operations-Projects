@@ -45,6 +45,9 @@ class RecordsExport implements FromCollection,WithHeadings
                 Record::INCOME_STATUSES[$item['income_status'] ?? null] ?? '',
                 Record::FAMILY_BURDENS[$item['family_burden'] ?? null] ?? '',
                 array_key_exists('distributed', $item) && !is_null($item['distributed']) ? ($item['distributed'] ? 'نعم' : 'لا') : '',
+                $item['branch_name'],
+                $item['eligible_label'],
+                $item['branch_notes'],
                 $item['user_name'],
                 $item['done'],
             ];
@@ -78,6 +81,9 @@ class RecordsExport implements FromCollection,WithHeadings
             'مصادر الدخل والوضع المالي',
             'حجم الأسرة والحالات الخاصة',
             'تم التوزيع',
+            'الفرع',
+            'يستحق',
+            'ملاحظات الفرع',
             'المستخدم',
             'تمت العملية',
         ];

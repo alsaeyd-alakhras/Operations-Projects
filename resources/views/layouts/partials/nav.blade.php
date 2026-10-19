@@ -63,6 +63,14 @@
                     </a>
                 </li>
                 @endcan
+                @can('view','App\\Models\Branch')
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-start" href="{{route('branches.index')}}">
+                        <i class="fe fe-map-pin fe-16"></i>
+                        <span class="ml-lg-2">الفروع</span>
+                    </a>
+                </li>
+                @endcan
                 @can('view','App\\Models\Logs')
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-start" href="{{route('logs.index')}}">

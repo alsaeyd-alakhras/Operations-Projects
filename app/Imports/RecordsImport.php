@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Record;
+use App\Models\Branch;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -48,6 +49,7 @@ class RecordsImport implements ToModel,WithHeadingRow
             'income_status' => $this->choice($row, ['msadr_aldkhl_walwd_almaly', 'income_status'], Record::INCOME_STATUSES),
             'family_burden' => $this->choice($row, ['hjm_alasr_walhalat_alkhas', 'family_burden'], Record::FAMILY_BURDENS),
             'distributed' => $this->distributed($row),
+            'branch_id' => $this->branch($row),
         ]);
     }
 
@@ -68,6 +70,17 @@ class RecordsImport implements ToModel,WithHeadingRow
         foreach (['tm_altwzy', 'distributed'] as $header) {
             if (array_key_exists($header, $row) && $row[$header] !== null && $row[$header] !== '') {
                 return in_array($row[$header], [1, '1', true, 'نعم', 'yes'], true);
+            }
+        }
+
+        return null;
+    }
+
+    private function branch(array $row): ?int
+    {
+        foreach (['alfraa', 'branch'] as $header) {
+            if (array_key_exists($header, $row) && $row[$header] !== null && $row[$header] !== '') {
+                return Branch::where('name', trim($row[$header]))->value('id');
             }
         }
 

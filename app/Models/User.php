@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -24,6 +25,7 @@ class User extends Authenticatable
         'username',
         'last_activity',
         'super_admin',
+        'branch_id',
     ];
 
     /**
@@ -49,6 +51,16 @@ class User extends Authenticatable
         ];
     }
 
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function isBranchUser(): bool
+    {
+        return ! is_null($this->branch_id);
+    }
 
     public function roles() :HasMany
     {
