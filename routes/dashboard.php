@@ -18,6 +18,7 @@ Route::group([
     })->name('dashboard');
 
     Route::get('records/archived', [RecordController::class, 'archived'])->name('records.archived');
+    Route::get('records/filter-options', [RecordController::class, 'filterOptions'])->name('records.filterOptions');
     Route::post('records/archivedRow', [RecordController::class, 'archivedRow'])->name('records.archivedRow');
     Route::post('records/print', [RecordController::class, 'print'])->name('records.print');
     Route::post('records/import', [RecordController::class, 'import'])->name('records.import');

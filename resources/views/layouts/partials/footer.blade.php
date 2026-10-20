@@ -202,17 +202,6 @@
     }
 </script>
 <script src="{{ asset('assets/js/apps.js') }}"></script>
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script src='{{ asset('assets/js/gtag.js') }}'></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-        dataLayer.push(arguments);
-    }
-    gtag('js', new Date());
-    gtag('config', 'UA-56159088-1');
-</script>
 <script src='{{ asset('vendor/livewire/livewire.js') }}'></script>
 @stack('scripts')
 </body>

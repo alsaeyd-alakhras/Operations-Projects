@@ -109,32 +109,205 @@ html.rec-dark {
 .rec-menu .dropdown-item .fe { font-size: 16px; color: var(--rec-muted); }
 .rec-menu .dropdown-item:hover .fe { color: inherit; }
 
-/* ---------- Page frame ---------- */
-.records-page { color: var(--rec-text); }
-.records-page .card {
-    margin-bottom: 0;
-    border: 1px solid var(--rec-line);
-    border-radius: var(--rec-radius);
-    background: var(--rec-surface);
-    box-shadow: var(--rec-shadow);
-    overflow: hidden;
+/* ---------- Page frame: full-bleed, fills the viewport under the navbar ---------- */
+.main-content:has(.records-page) { margin-top: 0 !important; }
+.main-content:has(.records-page) > .container-fluid { padding-inline: 0; }
+.records-page {
+    --rec-nav-h: 65px;                       /* shared navbar height */
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - var(--rec-nav-h));
+    color: var(--rec-text);
 }
 .records-page ::selection { background: var(--rec-brand-tint); color: inherit; }
+.records-page .rec-card {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--rec-surface);
+    border-top: 1px solid var(--rec-line);
+}
+/* thin brand progress bar while loading */
+.records-page .rec-card::before { content: ''; position: absolute; z-index: 8; inset: 0 auto auto 0; width: 0; height: 3px; background: var(--rec-brand); transition: width .2s ease; }
+.records-page .rec-card.rec-is-loading::before { width: 100%; }
+.records-page .rec-is-loading tbody { opacity: .45; }
+.records-page .rec-table-scroll { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* ---------- DataTables 2 container: [ scrolling table ] + [ pager bar ] ---------- */
+.records-page .dt-container { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; width: 100%; }
+.records-page .dt-container > .dt-layout-table {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0 !important;
+    overflow: auto;                          /* the ONE scroller: sticky thead/tfoot/name column live in it */
+    scrollbar-width: thin;
+    scrollbar-color: var(--rec-line) transparent;
+}
+.records-page .dt-container > .dt-layout-table::-webkit-scrollbar { width: 10px; height: 10px; }
+.records-page .dt-container > .dt-layout-table::-webkit-scrollbar-thumb { background: var(--rec-line); border-radius: 8px; border: 2px solid var(--rec-surface); }
+.records-page .dt-container > .dt-layout-table::-webkit-scrollbar-thumb:hover { background: var(--rec-muted); }
+/* خلية الجدول تمتد على كامل الارتفاع (بدل تمركزها عمودياً عندما تكون الصفوف قليلة) */
+.records-page .dt-container > .dt-layout-table { display: flex; align-items: stretch !important; }
+.records-page .dt-container > .dt-layout-table > div { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; width: 100%; padding: 0; }
+/* الصف الحشو: يأخذ المساحة المتبقية فيبقى الهيدر بالأعلى والمجاميع بالأسفل مهما قل عدد السجلات */
+.records-page table.dataTable tbody tr.rec-filler { height: 100%; }
+.records-page table.dataTable tbody tr.rec-filler > td,
+.records-page table.dataTable tbody tr.rec-filler:hover > td { padding: 0 !important; border: 0 !important; background: var(--rec-surface) !important; }
 
 /* ---------- Table frame ---------- */
 .records-page table.dataTable.sticky {
-    height: calc(100vh - 104px) !important;
+    display: table !important;               /* legacy sticky css made it display:block + fixed height */
+    flex: 1 0 auto;                          /* يملأ الخلية عمودياً؛ صف .rec-filler يمتص الزيادة */
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    width: 100% !important;
+    min-width: max-content;                  /* fill the width, never narrower than the columns */
     margin: 0 !important;
     border: 0 !important;
     border-collapse: separate !important;
     border-spacing: 0 !important;
     background: var(--rec-surface);
-    scrollbar-width: thin;
-    scrollbar-color: var(--rec-line) transparent;
 }
-.records-page table.sticky::-webkit-scrollbar { width: 10px; height: 10px; }
-.records-page table.sticky::-webkit-scrollbar-thumb { background: var(--rec-line); border-radius: 8px; border: 2px solid var(--rec-surface); }
-.records-page table.sticky::-webkit-scrollbar-thumb:hover { background: var(--rec-muted); }
+
+/* ---------- Bottom bar: record range (start) + page numbers (end) ---------- */
+.records-page .dt-container > .dt-layout-row:not(.dt-layout-table) {
+    flex: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    margin: 0 !important;
+    padding: 0 14px;
+    background: var(--rec-surface);
+    border-top: 1px solid var(--rec-line);
+}
+.records-page .dt-container > .dt-layout-row:not(.dt-layout-table) > .dt-layout-cell { padding: 0 !important; width: auto; }
+.records-page .dt-info { padding: 0 !important; color: var(--rec-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.records-page .dt-paging {
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    border: 1px solid var(--rec-line);
+    border-radius: 10px;
+    background: var(--rec-surface);
+    overflow: hidden;
+}
+.records-page .dt-paging .dt-paging-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 34px;
+    margin: 0 !important;
+    padding: 0 10px !important;
+    border: 0 !important;
+    border-inline-start: 1px solid var(--rec-line) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--rec-text) !important;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color .15s var(--rec-ease), border-color .15s var(--rec-ease), color .15s var(--rec-ease);
+}
+.records-page .dt-paging .dt-paging-button:first-child { border-inline-start: 0 !important; }
+.records-page .dt-paging .dt-paging-button:hover:not(.disabled):not(.current) {
+    background: var(--rec-brand-tint) !important;
+    color: var(--rec-brand-strong) !important;
+}
+.records-page .dt-paging .dt-paging-button.current { background: var(--rec-brand) !important; color: #fff !important; }
+.records-page .dt-paging .dt-paging-button.disabled { opacity: .4; cursor: default; pointer-events: none; }
+.records-page .dt-paging .dt-paging-button:focus-visible { outline: 2px solid var(--rec-brand); outline-offset: -2px; }
+.records-page .dt-paging .dt-paging-button.ellipsis { min-width: 28px; padding: 0 !important; color: var(--rec-muted) !important; }
+
+/* first / previous / next / last as feather icons (RTL: "first" is on the right, arrows point to their direction) */
+.records-page .dt-paging .dt-paging-button.first,
+.records-page .dt-paging .dt-paging-button.previous,
+.records-page .dt-paging .dt-paging-button.next,
+.records-page .dt-paging .dt-paging-button.last { width: 36px; font-size: 0 !important; }
+.records-page .dt-paging .dt-paging-button.first::before,
+.records-page .dt-paging .dt-paging-button.previous::before,
+.records-page .dt-paging .dt-paging-button.next::before,
+.records-page .dt-paging .dt-paging-button.last::before {
+    font-family: "feather" !important;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1;
+    color: inherit;
+}
+.records-page .dt-paging .dt-paging-button.first::before    { content: "\e934"; }  /* chevrons-right */
+.records-page .dt-paging .dt-paging-button.previous::before { content: "\e930"; }  /* chevron-right  */
+.records-page .dt-paging .dt-paging-button.next::before     { content: "\e92f"; }  /* chevron-left   */
+.records-page .dt-paging .dt-paging-button.last::before     { content: "\e933"; }  /* chevrons-left  */
+
+/* ---------- Column filter menu (Excel-style list) ---------- */
+.records-page .filterDropdownMenu { min-width: 270px; max-width: 320px; }
+.records-page .rec-filter-searchrow { display: flex; align-items: center; gap: 8px; }
+.records-page .rec-filter-searchrow .rec-filter-search { flex: 1; margin: 0 !important; }
+.records-page .rec-filter-searchrow .rec-filter-apply { margin-top: 0; flex: none; }
+.records-page .rec-filter-note { display: block; margin-top: 6px; color: var(--rec-muted); font-size: 12px; line-height: 1.45; }
+.records-page .rec-filter-note:empty { display: none; }
+.records-page .rec-filter-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--rec-line);
+}
+.records-page .rec-filter-foot label { display: flex; align-items: center; gap: 6px; margin: 0; padding: 4px 6px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.records-page .rec-filter-foot label:hover { background: var(--rec-brand-tint); }
+.records-page .rec-filter-foot .rec-filter-apply { margin-top: 0; }
+.records-page .filterDropdownMenu > label { display: block; margin: 8px 0 0; font-size: 13px; font-weight: 600; color: var(--rec-muted); }
+
+
+/* ---------- Navbar extras: counter, page size, search dot ---------- */
+.rec-nav-meta { gap: 8px; margin-inline-start: 4px; padding-inline-start: 10px; border-inline-start: 1px solid rgba(255, 255, 255, .18); }
+.rec-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .08);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.rec-count .fe { font-size: 15px; opacity: .8; }
+.rec-select {
+    height: 36px;
+    padding: 0 8px;
+    border: 1px solid rgba(255, 255, 255, .24);
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.rec-select:hover { background: rgba(255, 255, 255, .12); }
+.rec-select:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.rec-select option { background: #262a31; color: #fff; }
+.rec-tool--icon { position: relative; }
+.records-search-active { position: absolute; top: 5px; inset-inline-end: 5px; width: 8px; height: 8px; border-radius: 50%; background: #ff6b70; box-shadow: 0 0 0 2px #343a40; }
+.records-search-menu { min-width: 280px; padding: 14px; }
+.records-search-menu label { display: block; margin: 0 0 5px; color: var(--rec-muted); font-size: 13px; font-weight: 700; }
+.records-search-menu .form-control { margin-bottom: 10px; background: var(--rec-surface); color: var(--rec-text); border-color: var(--rec-line); }
+
 
 /* ---------- Header ---------- */
 .records-page table.sticky thead { top: 0 !important; background: var(--rec-head); }
@@ -208,7 +381,8 @@ html.rec-dark {
 .records-page .filterDropdownMenu .search-checkbox { width: auto !important; flex: 1; margin: 0 !important; }
 .records-page .filterDropdownMenu .filter-apply-btn,
 .records-page .filterDropdownMenu .filter-apply-btn-checkbox,
-.records-page .filterDropdownMenu .filter-apply-btn-data {
+.records-page .filterDropdownMenu .filter-apply-btn-data,
+.records-page .filterDropdownMenu .rec-filter-apply {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -223,8 +397,17 @@ html.rec-dark {
 }
 .records-page .filterDropdownMenu .filter-apply-btn:hover,
 .records-page .filterDropdownMenu .filter-apply-btn-checkbox:hover,
-.records-page .filterDropdownMenu .filter-apply-btn-data:hover { background: var(--rec-brand-strong) !important; }
+.records-page .filterDropdownMenu .filter-apply-btn-data:hover,
+.records-page .filterDropdownMenu .rec-filter-apply:hover { background: var(--rec-brand-strong) !important; }
 .records-page .filterDropdownMenu .filter-apply-btn-checkbox { margin: 0 8px 0 0; }
+.records-page .filterDropdownMenu .rec-filter-clear {
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+    color: var(--rec-muted);
+    font-size: 13px;
+}
+.records-page .filterDropdownMenu .rec-filter-clear:hover { color: var(--rec-brand-strong); }
 .records-page .checkbox-list-box {
     margin-top: 10px;
     padding-top: 8px;
