@@ -1,29 +1,59 @@
-@include('layouts.partials.header',['title' => config('app.name')])
-    <div class="wrapper vh-100">
-        <div class="row align-items-center h-100">
-            <form class="col-lg-3 col-md-4 col-10 mx-auto text-center" action="{{route('login')}}" method="POST" >
-                @csrf
-                <a class="navbar-brand mx-auto mt-2 flex-fill text-center" href="#">
-                    <img src="{{asset('img/logo.png')}}" alt="logo..." style="max-width:90%;">
-                </a>
-                <h1 class="h3 m-3">تسجيل الدخول</h1>
-                <div class="form-group">
-                    <label for="username" class="sr-only">اسم المستخدم</label>
-                    <x-form.input type="text" id="username" name="username" class="form-control-lg" placeholder="أدخل اسم المستخدم الخاص بك" required autofocus />
-                </div>
-                <div class="form-group">
-                    <label for="inputPassword" class="sr-only">كلمة المرور</label>
-                    <x-form.input type="password" name="password" id="inputPassword" class="form-control-lg" placeholder="أدخل كلمة المرور" required="" />
-                </div>
-                {{-- <div class="checkbox mb-3">
-                    <label>
-                    <input type="checkbox" value="remember-me"> Stay logged in </label>
-                </div> --}}
-                <button class="btn btn-lg btn-primary btn-block" type="submit">هيا بنا</button>
-                <div class="btn-box w-100 mt-3 mb-1">
-                    <p class="text-muted font-weight-bold h6">© تم الإنشاء بواسطة <a href="https://saeyd-jamal.github.io/My_Portfolio/" target="_blank">م.السيد الأخرس</a></p>
-                </div>
-            </form>
+@include('layouts.partials.header', ['title' => config('app.name')])
+<link rel="stylesheet" href="{{ asset('css/login.css') }}">
+<script>
+    try { document.documentElement.classList.toggle('rec-dark', localStorage.getItem('mode') === 'dark'); } catch (e) {}
+    document.body.classList.add('lg-body');
+</script>
+<div class="lg-wrap">
+    <form class="lg-card" action="{{ route('login') }}" method="POST">
+        @csrf
+        <img class="lg-logo lg-logo--light" src="{{ asset('img/logo.png') }}" alt="{{ config('app.name') }}">
+        <img class="lg-logo lg-logo--dark" src="{{ asset('img/logo-wh.png') }}" alt="" aria-hidden="true">
+        <h1 class="lg-title">تسجيل الدخول</h1>
+        <p class="lg-sub">أدخل بياناتك للوصول إلى لوحة التحكم</p>
+
+        <div class="lg-field">
+            <label for="username">اسم المستخدم</label>
+            <div class="lg-input">
+                <i class="fe fe-user" aria-hidden="true"></i>
+                <input type="text" id="username" name="username" value="{{ old('username') }}"
+                    class="@error('username') is-invalid @enderror" placeholder="أدخل اسم المستخدم"
+                    autocomplete="username" required autofocus>
+            </div>
+            @error('username')
+                <div class="lg-error" role="alert">{{ $message }}</div>
+            @enderror
         </div>
-    </div>
+
+        <div class="lg-field">
+            <label for="inputPassword">كلمة المرور</label>
+            <div class="lg-input">
+                <i class="fe fe-lock" aria-hidden="true"></i>
+                <input type="password" id="inputPassword" name="password" class="has-eye @error('password') is-invalid @enderror"
+                    placeholder="أدخل كلمة المرور" autocomplete="current-password" required>
+                <button type="button" class="lg-eye" id="lg-toggle" aria-label="إظهار كلمة المرور"><i class="fe fe-eye"></i></button>
+            </div>
+            @error('password')
+                <div class="lg-error" role="alert">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <button class="lg-submit" type="submit">دخول</button>
+
+        <p class="lg-foot">© تم الإنشاء بواسطة <a href="https://www.alsaeyd.tech/ar" target="_blank" rel="noopener">م.السيد الأخرس</a></p>
+    </form>
+</div>
+@push('scripts')
+    <script>
+        (function () {
+            var btn = document.getElementById('lg-toggle'), input = document.getElementById('inputPassword');
+            btn.addEventListener('click', function () {
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                btn.querySelector('i').className = show ? 'fe fe-eye-off' : 'fe fe-eye';
+                btn.setAttribute('aria-label', show ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور');
+            });
+        })();
+    </script>
+@endpush
 @include('layouts.partials.footer')

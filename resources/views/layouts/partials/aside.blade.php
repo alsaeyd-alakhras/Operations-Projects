@@ -7,7 +7,7 @@
         <div class="row justify-content-center" style="text-align:center;">
             <div class="w-100 mb-4 d-flex">
                 <a class="navbar-brand mx-auto mt-2 flex-fill text-center" href="./index.html">
-                    <img src="{{asset('img/logo.png')}}" class="navbar-brand-img mx-auto" alt="..." style="width: 75%">
+                    <img src="{{asset('img/logo.png')}}" class="navbar-brand-img mx-auto" alt="..." style="width: 45%">
                 </a>
             </div>
             <h2>{{Config::get('app.name')}}</h2>
@@ -63,7 +63,7 @@
             @endcan
         </ul>
         <div class="btn-box w-100 mt-3 mb-1">
-            <p class="text-muted font-weight-bold h6">© تم الإنشاء بواسطة <a href="https://saeyd-jamal.github.io/My_Portfolio/" target="_blank">م.السيد الأخرس</a></p>
+            <p class="text-muted font-weight-bold h6">© تم الإنشاء بواسطة <a href="https://www.alsaeyd.tech/ar" target="_blank">م.السيد الأخرس</a></p>
         </div>
     </nav>
 </aside>

@@ -17,8 +17,8 @@
 </style>
 <nav class="navbar navbar-expand-lg navbar-light bg-dark flex-row border-bottom shadow p-0">
     <div class="container-fluid">
-        <a class="navbar-brand mx-lg-1 mr-0 d-flex align-items-center p-0" href="{{route('records.index')}}}">
-            <img src="{{asset('img/logo.png')}}" class="navbar-brand-img" alt="..." style="width: 8%">
+        <a class="navbar-brand mx-lg-1 mr-0 d-flex align-items-center p-0" href="{{ route('records.index') }}">
+            <img src="{{asset('img/logo-wh.png')}}" class="navbar-brand-img" alt="شعار" style="height: 44px; width: auto; max-width: none;">
             <h1 class="h3 ml-2 mb-0 text-white">مستشفى يافا الطبي</h1>
         </a>
         <button class="navbar-toggler mt-2 mr-auto toggle-sidebar text-muted">
