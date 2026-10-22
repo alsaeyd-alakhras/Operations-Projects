@@ -64,14 +64,19 @@
                     $('<label>').append($('<input>', { type: 'checkbox', value: value, checked: selected.indexOf(value) !== -1 }))
                         .append(document.createTextNode(' ' + value)).appendTo($options);
                 });
-                var hasQuery = !!$.trim($menu.find('.rec-filter-search').val());
-                $menu.find('.rec-filter-note').text(truncated ? (hasQuery ? 'عرض أول 100 نتيجة — «كل نتائج البحث» تشمل كل المطابقات' : 'عرض أول 100 نتيجة — اكتب للبحث') : '');
+                $menu.find('.rec-filter-note').text(truncated ? 'تم عرض أول 5000 نتيجة' : '');
             }
             function loadOptions($menu, query) {
                 var col = String($menu.data('col'));
+                var filters = $.extend({}, state.filters);
+                delete filters[col];
                 if (requests[col]) requests[col].abort();
                 var token = Date.now(); $menu.data('rec-token', token);
-                requests[col] = $.getJSON(config.urls.filterOptions, { column: col, archived: config.archived, year: state.year, q: query, limit: 100 })
+                requests[col] = $.getJSON(config.urls.filterOptions, {
+                    column: col, archived: config.archived, year: state.year, q: query,
+                    filters: JSON.stringify(filters), from_date: state.from_date, to_date: state.to_date,
+                    from_age: state.from_age, to_age: state.to_age
+                })
                     .done(function (json) {
                         if ($menu.data('rec-token') !== token) return;
                         listOptions($menu, (json && json.values) || [], ((state.filters[col] || {}).values || []).map(String), json && json.truncated);
@@ -152,7 +157,7 @@
                         var values = $menu.find('.rec-filter-options input:checked').map(function () { return this.value; }).get();
                         var empty = $menu.find('.rec-filter-empty').prop('checked') === true;
                         var search = $.trim($menu.find('.rec-filter-search').val()), contains = '';
-                        // مثل Excel: نص بحث + «كل نتائج البحث» (أو بدون تحديد) = تصفية «يحتوي على» على كل المطابقات، حتى لو ظهر أول 100 فقط
+                        // مثل Excel: نص بحث + «كل نتائج البحث» (أو بدون تحديد) = تصفية «يحتوي على» على كل المطابقات
                         if (!$menu.data('static') && search && ($menu.find('.rec-filter-all').prop('checked') || !values.length)) { contains = search; values = []; }
                         if (values.length || empty || contains) state.filters[col] = { values: values, empty: empty, contains: contains }; else delete state.filters[col];
                     }

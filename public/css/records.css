@@ -413,7 +413,7 @@ html.rec-dark {
     padding-top: 8px;
     border-top: 1px solid var(--rec-line);
 }
-.records-page .checkbox-list { max-height: 210px; max-width: none; padding-inline-end: 4px; }
+.records-page .checkbox-list { max-height: 210px; max-width: none; padding-inline-end: 4px; overflow-y: auto; }
 .records-page .checkbox-list-box label,
 .records-page .searchable-checkbox > label {
     display: flex !important;

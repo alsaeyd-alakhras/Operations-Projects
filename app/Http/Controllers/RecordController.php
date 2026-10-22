@@ -347,11 +347,16 @@ class RecordController extends Controller
             return response()->json(['values' => [], 'truncated' => false]);
         }
 
-        $limit = min(max((int) $request->input('limit', 100), 1), 300);
+        $limit = min(max((int) $request->input('limit', 5000), 1), 5000);
         $query = Record::query()->where('archived', (int) $request->boolean('archived'));
         if ($request->filled('year') && $request->input('year') !== 'all') {
             $query->whereYear('date', (int) $request->input('year'));
         }
+        if ($request->filled('from_date')) $query->whereDate('date', '>=', $request->input('from_date'));
+        if ($request->filled('to_date')) $query->whereDate('date', '<=', $request->input('to_date'));
+        if ($request->filled('from_age')) $query->where('age', '>=', (int) $request->input('from_age'));
+        if ($request->filled('to_age')) $query->where('age', '<=', (int) $request->input('to_age'));
+        $this->applyColumnFilters($query, $request->input('filters', []));
         $query->whereNotNull($column)->where($column, '<>', '');
         if ($request->filled('q')) {
             $query->where($column, 'like', '%'.$this->escapeLike($request->input('q')).'%');
@@ -389,7 +394,11 @@ class RecordController extends Controller
                 }
             });
         }
-        $filters = $request->input('filters', []);
+        $this->applyColumnFilters($query, $request->input('filters', []));
+    }
+
+    private function applyColumnFilters(Builder $query, mixed $filters): void
+    {
         if (is_string($filters)) $filters = json_decode($filters, true) ?: [];
         foreach ((array) $filters as $column => $value) {
             $types = $this->filterableColumns();
