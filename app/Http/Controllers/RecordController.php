@@ -347,22 +347,39 @@ class RecordController extends Controller
             return response()->json(['values' => [], 'truncated' => false]);
         }
 
+        if (in_array($column, ['amount', 'doctor_share', 'anesthesiologists_share', 'bed', 'private'], true) && ! auth()->user()->can('financial', Record::class)) {
+            return response()->json(['values' => [], 'truncated' => false]);
+        }
+
         $limit = min(max((int) $request->input('limit', 5000), 1), 5000);
-        $query = Record::query()->where('archived', (int) $request->boolean('archived'));
+        $expr = $this->columnExpression($column);
+        $query = Record::query()
+            ->leftJoin('financiers', 'financiers.financier_number', '=', 'records.financier_number')
+            ->leftJoin('branches', 'branches.id', '=', 'records.branch_id')
+            ->where('records.archived', (int) $request->boolean('archived'));
         if ($request->filled('year') && $request->input('year') !== 'all') {
-            $query->whereYear('date', (int) $request->input('year'));
+            $query->whereYear('records.date', (int) $request->input('year'));
         }
-        if ($request->filled('from_date')) $query->whereDate('date', '>=', $request->input('from_date'));
-        if ($request->filled('to_date')) $query->whereDate('date', '<=', $request->input('to_date'));
-        if ($request->filled('from_age')) $query->where('age', '>=', (int) $request->input('from_age'));
-        if ($request->filled('to_age')) $query->where('age', '<=', (int) $request->input('to_age'));
+        if ($request->filled('from_date')) $query->whereDate('records.date', '>=', $request->input('from_date'));
+        if ($request->filled('to_date')) $query->whereDate('records.date', '<=', $request->input('to_date'));
+        if ($request->filled('from_age')) $query->where('records.age', '>=', (int) $request->input('from_age'));
+        if ($request->filled('to_age')) $query->where('records.age', '<=', (int) $request->input('to_age'));
         $this->applyColumnFilters($query, $request->input('filters', []));
-        $query->whereNotNull($column)->where($column, '<>', '');
+        $query->whereNotNull($expr)->where($expr, '<>', '');
         if ($request->filled('q')) {
-            $query->where($column, 'like', '%'.$this->escapeLike($request->input('q')).'%');
+            $query->where($expr, 'like', '%'.$this->escapeLike($request->input('q')).'%');
         }
-        $values = $query->distinct()->orderBy($column)->limit($limit + 1)->pluck($column);
+        $values = $query->distinct()->orderBy($expr)->limit($limit + 1)->pluck($expr);
         return response()->json(['values' => $values->take($limit)->values(), 'truncated' => $values->count() > $limit]);
+    }
+
+    private function columnExpression(string $column): string
+    {
+        return match ($column) {
+            'financier' => 'financiers.name',
+            'branch_name' => 'branches.name',
+            default => 'records.'.$column,
+        };
     }
 
     private function filteredRecordsQuery(Request $request, int $archived): Builder
@@ -403,7 +420,7 @@ class RecordController extends Controller
         foreach ((array) $filters as $column => $value) {
             $types = $this->filterableColumns();
             if (! isset($types[$column])) continue;
-            $qualified = 'records.'.$column;
+            $qualified = $this->columnExpression($column);
             $filter = is_array($value) ? $value : ['values' => [$value]];
             // Enum/boolean UI filters use a scalar `value`; list filters use `values`.
             $values = $filter['values'] ?? (array_key_exists('value', $filter) ? [$filter['value']] : $filter);
@@ -439,7 +456,7 @@ class RecordController extends Controller
 
     private function filterableColumns(): array
     {
-        return ['name' => 'list', 'financier_number' => 'list', 'address' => 'list', 'patient_ID' => 'list', 'operation' => 'list', 'doctor' => 'list', 'anesthesia' => 'list', 'user_name' => 'list', 'displacement_status' => 'displacement_status', 'income_status' => 'income_status', 'family_burden' => 'family_burden', 'done' => 'boolean', 'distributed' => 'boolean', 'eligible' => 'boolean'];
+        return ['name' => 'list', 'financier_number' => 'list', 'address' => 'list', 'patient_ID' => 'list', 'operation' => 'list', 'doctor' => 'list', 'anesthesia' => 'list', 'user_name' => 'list', 'financier' => 'list', 'phone_number1' => 'list', 'phone_number2' => 'list', 'amount' => 'list', 'doctor_share' => 'list', 'anesthesiologists_share' => 'list', 'bed' => 'list', 'private' => 'list', 'notes' => 'list', 'notes_2' => 'list', 'branch_name' => 'list', 'branch_notes' => 'list', 'displacement_status' => 'displacement_status', 'income_status' => 'income_status', 'family_burden' => 'family_burden', 'done' => 'boolean', 'distributed' => 'boolean', 'eligible' => 'boolean'];
     }
 
     private function dataTableMeta(Request $request, int $archived): array

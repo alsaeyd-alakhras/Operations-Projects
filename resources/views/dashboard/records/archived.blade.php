@@ -69,17 +69,17 @@
 <th>@include('dashboard.records._th-filter', ['col' => 'done', 'label' => 'تمت', 'type' => 'bool'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'date', 'label' => 'التاريخ', 'type' => 'date'])</th>
 <th class="sticky" style="right: 0px;">@include('dashboard.records._th-filter', ['col' => 'name', 'label' => 'اسم المريض', 'type' => 'list'])</th>
-<th>@include('dashboard.records._th-filter', ['col' => 'financier_number', 'label' => 'رقم الممول', 'type' => 'list'])</th><th>اسم الممول</th>
+<th>@include('dashboard.records._th-filter', ['col' => 'financier_number', 'label' => 'رقم الممول', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'financier', 'label' => 'اسم الممول', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'displacement_status', 'label' => 'حالة النزوح والسكن وتضرر البيت', 'type' => 'enum', 'options' => \App\Models\Record::DISPLACEMENT_STATUSES])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'income_status', 'label' => 'مصادر الدخل والوضع المالي', 'type' => 'enum', 'options' => \App\Models\Record::INCOME_STATUSES])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'family_burden', 'label' => 'حجم الأسرة والحالات الخاصة', 'type' => 'enum', 'options' => \App\Models\Record::FAMILY_BURDENS])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'distributed', 'label' => 'تم التوزيع', 'type' => 'bool'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'age', 'label' => 'العمر', 'type' => 'range'])</th>
-<th>@include('dashboard.records._th-filter', ['col' => 'patient_ID', 'label' => 'رقم الهوية', 'type' => 'list'])</th><th>جوال 1</th><th>جوال 2</th>
+<th>@include('dashboard.records._th-filter', ['col' => 'patient_ID', 'label' => 'رقم الهوية', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'phone_number1', 'label' => 'جوال 1', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'phone_number2', 'label' => 'جوال 2', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'operation', 'label' => 'العملية', 'type' => 'list'])</th>
-<th>@include('dashboard.records._th-filter', ['col' => 'doctor', 'label' => 'الطبيب', 'type' => 'list'])</th><th>التكلفة</th>
-@can('financial','App\\Models\Record')<th>حصة الطبيب</th><th>طبيب التخدير</th><th>حصة التخدير</th><th>المبيت</th><th>خاص</th>@else<th></th><th>طبيب التخدير</th><th></th><th></th><th></th>@endcan
-<th>ملاحظات</th><th>ملاحظات ثانوية</th><th>الفرع</th><th>يستحق</th><th>ملاحظات الفرع</th>
+<th>@include('dashboard.records._th-filter', ['col' => 'doctor', 'label' => 'الطبيب', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'amount', 'label' => 'التكلفة', 'type' => 'list'])</th>
+@can('financial','App\\Models\Record')<th>@include('dashboard.records._th-filter', ['col' => 'doctor_share', 'label' => 'حصة الطبيب', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'anesthesia', 'label' => 'طبيب التخدير', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'anesthesiologists_share', 'label' => 'حصة التخدير', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'bed', 'label' => 'المبيت', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'private', 'label' => 'خاص', 'type' => 'list'])</th>@else<th></th><th>@include('dashboard.records._th-filter', ['col' => 'anesthesia', 'label' => 'طبيب التخدير', 'type' => 'list'])</th><th></th><th></th><th></th>@endcan
+<th>@include('dashboard.records._th-filter', ['col' => 'notes', 'label' => 'ملاحظات', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'notes_2', 'label' => 'ملاحظات ثانوية', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'branch_name', 'label' => 'الفرع', 'type' => 'list'])</th><th>@include('dashboard.records._th-filter', ['col' => 'eligible', 'label' => 'يستحق', 'type' => 'bool'])</th><th>@include('dashboard.records._th-filter', ['col' => 'branch_notes', 'label' => 'ملاحظات الفرع', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'user_name', 'label' => 'المستخدم', 'type' => 'list'])</th><th></th><th></th>
 </tr>
 </thead>
