@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ColumnProfile;
 use App\Models\Record;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -15,6 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        ColumnProfile::seedDefaults();
         // User::factory(10)->create();
         // Record::factory(100)->create();
 

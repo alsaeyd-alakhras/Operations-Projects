@@ -116,7 +116,7 @@ class TableRecord extends Component
                 }elseif($key == 'to_date'){
                     $value = \Carbon\Carbon::parse($value)->format('Y-m-d');
                     $this->records = $this->records->where('date', '<=', $value);
-                }elseif($key == 'financier_number' || $key == 'operation' || $key == 'doctor' || $key == 'anesthesia' || $key == 'done' || $key == 'displacement_status' || $key == 'income_status' || $key == 'family_burden' || $key == 'distributed'){
+                }elseif($key == 'financier_number' || $key == 'operation' || $key == 'doctor' || $key == 'anesthesia' || $key == 'done' || $key == 'displacement_status' || $key == 'income_status' || $key == 'family_burden' || $key == 'distributed' || $key == 'management_status'){
                     $this->records = $this->records->where($key, '=', $value);
                 }else{
                     $this->records = $this->records->where($key, 'like', '%'.$value.'%');

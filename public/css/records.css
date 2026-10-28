@@ -682,3 +682,126 @@ html.rec-dark .rec-form label.error { color: #ff8a8f; }
 @media (prefers-reduced-motion: reduce) {
     .rec-tool, .rec-btn, .btn-filter, .form-control { transition: none; }
 }
+
+/* ==========================================================================
+   Merged sticky actions column + column settings + management approval
+   ========================================================================== */
+.records-page { --rec-actions-w: 112px; }
+
+/* Actions: last column = physical left edge in RTL; pinned there while scrolling */
+.records-page table.dataTable th.rec-actions,
+.records-page table.dataTable td.rec-actions,
+.records-page table.dataTable tfoot td.rec-actions {
+    position: sticky;
+    left: 0;
+    width: var(--rec-actions-w);
+    min-width: var(--rec-actions-w);
+    max-width: var(--rec-actions-w);
+    padding-inline: 4px !important;
+    white-space: nowrap;
+    text-align: center;
+    z-index: 4;
+}
+.records-page table.dataTable thead th.rec-actions { background: var(--rec-head); z-index: 6; }
+.records-page table.dataTable tfoot td.rec-actions { background: var(--rec-foot); }
+/* thead = z-index 4 و tfoot = 3 (stickyTable.css): خلايا الجسم لازم تبقى تحتهم وإلا تظهر الأزرار فوق الرأس والمجموع */
+.records-page table.dataTable tbody td.rec-actions {
+    z-index: 2;
+    background: var(--rec-surface);
+    box-shadow: inset -1px 0 0 var(--rec-line), 6px 0 10px -8px rgba(16, 24, 40, .25);
+}
+.records-page table.dataTable.table-striped > tbody > tr:nth-of-type(odd) > td.rec-actions { background: var(--rec-surface-2); }
+.records-page table.dataTable.table-hover > tbody > tr:hover > td.rec-actions { background: #fbeaea; }
+html.rec-dark .records-page table.dataTable.table-hover > tbody > tr:hover > td.rec-actions { background: #3a2527; }
+.records-page table.dataTable tbody td.rec-actions:empty::after { content: none; }
+.records-page td.rec-actions .btn-icon { width: 28px; height: 28px; margin: 0 1px; }
+.records-page td.rec-actions { box-shadow: inset -1px 0 0 var(--rec-line), 8px 0 12px -8px rgba(16, 24, 40, .35); }
+.records-page td.rec-actions > .btn-icon:hover { background: var(--rec-brand-tint); border-radius: 6px; }
+
+
+/* ---------- Column settings dropdown ---------- */
+.rec-cols-menu { min-width: 250px; max-width: 320px; padding: 8px; }
+.rec-cols-head { display: flex; gap: 6px; margin-bottom: 8px; }
+.rec-cols-head button {
+    flex: 1; border: 1px solid var(--rec-line); background: var(--rec-surface-2); color: var(--rec-text);
+    border-radius: 8px; padding: 5px 8px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+}
+.rec-cols-head button:hover { background: var(--rec-brand-tint); color: var(--rec-brand-strong); }
+.rec-cols-list { max-height: 55vh; overflow-y: auto; }
+.rec-cols-list label {
+    display: flex; align-items: center; gap: 8px; margin: 0; padding: 5px 6px; border-radius: 6px;
+    font-size: 13px; color: var(--rec-text); cursor: pointer; white-space: normal;
+}
+.rec-cols-list label:hover { background: var(--rec-brand-tint); }
+.rec-cols-list input { margin: 0; flex: none; }
+
+/* ---------- Management approval ---------- */
+.rec-chip--gray { background: var(--rec-no-bg); color: var(--rec-no); }
+.rec-chip--amber { background: rgba(217, 140, 20, .16); color: #8a5a00; }
+.rec-chip--green { background: var(--rec-ok-bg); color: var(--rec-ok); }
+.rec-chip--red { background: rgba(220, 38, 38, .13); color: #b4232a; }
+html.rec-dark .rec-chip--amber { background: rgba(240, 175, 60, .16); color: #f0b84a; }
+html.rec-dark .rec-chip--red { background: rgba(255, 110, 110, .16); color: #ff8a8a; }
+.rec-mgmt { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+select.rec-mgmt-select.rec-chip {
+    border: 0; cursor: pointer; padding: 2px 8px; max-width: 112px; height: auto; font-family: inherit;
+}
+select.rec-mgmt-select.rec-chip:focus-visible { outline: 2px solid var(--rec-brand); outline-offset: 1px; }
+select.rec-mgmt-select option { background: var(--rec-surface); color: var(--rec-text); }
+.rec-mgmt-note {
+    border: 0; background: transparent; color: var(--rec-muted); width: 26px; height: 26px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer;
+}
+.rec-mgmt-note:hover { background: var(--rec-brand-tint); color: var(--rec-brand-strong); }
+.rec-mgmt-note.has-notes { color: var(--rec-brand); }
+.rec-mgmt-pop {
+    position: fixed; z-index: 2000; width: 280px; padding: 10px; border-radius: 12px;
+    background: var(--rec-surface); color: var(--rec-text); border: 1px solid var(--rec-line); box-shadow: var(--rec-shadow-pop);
+}
+.rec-mgmt-pop label { display: block; margin: 0 0 6px; font-size: 12.5px; font-weight: 700; }
+.rec-mgmt-pop textarea {
+    width: 100%; resize: vertical; border: 1px solid var(--rec-line); border-radius: 8px; padding: 6px 8px;
+    background: var(--rec-surface-2); color: var(--rec-text); font-size: 13px;
+}
+.rec-mgmt-pop-foot { display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px; }
+.rec-mgmt-pop-foot button { border: 0; border-radius: 8px; padding: 5px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.rec-mgmt-cancel { background: var(--rec-surface-2); color: var(--rec-text); }
+.rec-mgmt-save { background: var(--rec-brand); color: #fff; }
+.rec-mgmt-save:disabled { opacity: .6; }
+
+/* ---------- Toast ---------- */
+.rec-toasts { position: fixed; bottom: 18px; inset-inline-start: 18px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; }
+.rec-toast { padding: 9px 16px; border-radius: 10px; color: #fff; font-size: 13.5px; font-weight: 600; box-shadow: var(--rec-shadow-pop); }
+.rec-toast--ok { background: #1b7f55; }
+.rec-toast--error { background: #c0262d; }
+
+/* نافبار مضغوط: روابط على سطر واحد */
+.navbar .navbar-nav .nav-link { white-space: nowrap; }
+.records-page table.dataTable thead th.rec-actions { text-align: center; font-size: 12.5px; }
+/* datatableIndex.css يفرض position:relative !important على كل th غير .sticky، فنثبّت رأس الإجراءات صراحةً */
+.records-page table.dataTable thead th.rec-actions { position: sticky !important; left: 0; }
+
+/* تذييل الجدول: العدد + عدد الصفوف + المعلومات في جهة، والتنقل في الجهة الأخرى */
+.records-page .rec-foot-meta { display: inline-flex; align-items: center; gap: 10px; margin-inline-end: 14px; }
+.records-page .rec-foot-meta .rec-count { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; background: var(--rec-surface-2); border: 1px solid var(--rec-line); color: var(--rec-text); font-size: 13px; }
+.records-page .rec-foot-meta .rec-pagelen { margin: 0; color: var(--rec-muted); font-size: 12.5px; }
+.records-page .rec-foot-meta .rec-select { height: 32px; padding: 0 8px; border: 1px solid var(--rec-line); border-radius: 8px; background: var(--rec-surface); color: var(--rec-text); font-size: 13px; }
+.records-page .dt-layout-start { display: flex; align-items: center; flex-wrap: wrap; }
+.records-page .dt-container > .dt-layout-row:not(.dt-layout-table) > .dt-layout-start { flex: 1 1 auto; margin: 0 !important; justify-content: flex-start; }
+.records-page .dt-container > .dt-layout-row:not(.dt-layout-table) > .dt-layout-end { flex: 0 0 auto; margin: 0 !important; justify-content: flex-end; }
+
+/* ---------- Navbar: مريح وواضح ---------- */
+.navbar .navbar-nav .nav-item > .nav-link { padding: 10px 16px; font-size: 15px; font-weight: 600; gap: 8px; align-items: center !important; border-radius: 10px; }
+.navbar .navbar-nav .nav-item > .nav-link .fe { font-size: 18px; }
+.navbar .navbar-nav .nav-item + .nav-item { margin-inline-start: 6px; }
+.navbar .navbar-nav .nav-item > .nav-link.dropdown-toggle::after { margin-inline-start: 4px; }
+.navbar .navbar-nav .dropdown-menu.rec-menu .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 14.5px; }
+.navbar .navbar-nav.d-flex.flex-row { gap: 4px; align-items: center; }
+.navbar .navbar-brand { margin-inline-end: 28px !important; }
+.navbar-nav .rec-tool { height: 40px; }
+.navbar-nav .rec-tool--icon { width: 40px; }
+@media (max-width: 1500px) {
+    .navbar .navbar-nav .nav-item > .nav-link { padding: 10px 10px; font-size: 14px; }
+    .navbar .navbar-brand h1 { font-size: 1.35rem; }
+    .navbar .navbar-brand { margin-inline-end: 12px !important; }
+}

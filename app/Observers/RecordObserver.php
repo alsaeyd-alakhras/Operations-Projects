@@ -28,9 +28,10 @@ class RecordObserver
     {
         $changes = array_values(array_diff(array_keys($record->getChanges()), ['updated_at']));
         $isBranchUpdate = !empty($changes) && empty(array_diff($changes, ['eligible', 'branch_notes']));
+        $isManagementUpdate = !empty($changes) && empty(array_diff($changes, ['management_status', 'management_notes']));
         Logs::create([
             'type' => 'update',
-            'message' => $isBranchUpdate ? 'تم تحديث استحقاق/ملاحظات الفرع لمريض' : 'تم  تعديل بيانات مريض : ' . $record->name,
+            'message' => $isBranchUpdate ? 'تم تحديث استحقاق/ملاحظات الفرع لمريض' : ($isManagementUpdate ? 'تم تحديث موافقة الإدارة لمريض : ' . $record->name : 'تم  تعديل بيانات مريض : ' . $record->name),
             'user_id' => Auth::user()->id,
             'user_name' => Auth::user()->name,
         ]);

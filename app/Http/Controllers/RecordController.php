@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\RecordsExport;
 use App\Imports\RecordsImport;
+use App\Models\ColumnProfile;
 use App\Models\Financier;
 use App\Models\Logs;
 use App\Models\Record;
@@ -30,11 +31,11 @@ class RecordController extends Controller
             // جلب بيانات المستخدمين من الجدول
             $records = $this->filteredRecordsQuery($request, 0);
             // التصفية بناءً على التواريخ
-            if ($request->from_date != null && $request->to_date != null) {
+            if ($request->from_date != null && $request->to_date != null && $this->columnAllowed('date')) {
                 $records->whereBetween('date', [$request->from_date, $request->to_date]);
             }
 
-            if ($request->from_age != null && $request->to_age != null) {
+            if ($request->from_age != null && $request->to_age != null && $this->columnAllowed('age')) {
                 $records->whereBetween('age', [$request->from_age, $request->to_age]);
             }
 
@@ -42,7 +43,7 @@ class RecordController extends Controller
                 $records->whereNull($request->fieldNull);
             }
 
-            return DataTables::of($records)
+            return $this->restrictDataTable(DataTables::of($records)
                     ->addIndexColumn()  // إضافة عمود الترقيم التلقائي
                     ->addColumn('financier', fn ($record) => $record->financier_name)
                     ->addColumn('displacement_status_label', fn ($record) => $record->displacement_status_label)
@@ -51,6 +52,8 @@ class RecordController extends Controller
                     ->addColumn('distributed_label', fn ($record) => $record->distributed_label)
                     ->addColumn('branch_name', fn ($record) => $record->branch_name_sql)
                     ->addColumn('eligible_label', fn ($record) => $record->eligible_label)
+                    ->addColumn('management_status_label', fn ($record) => $record->management_status_label)
+                    ->addColumn('management_notes', fn ($record) => $record->management_notes)
                     ->addColumn('edit', function ($record) {
                         return $record->id;
                     })
@@ -60,7 +63,7 @@ class RecordController extends Controller
                     ->addColumn('delete', function ($record) {
                         return $record->id;
                     })
-                    ->with($this->dataTableMeta($request, 0))
+                    ->with($this->dataTableMeta($request, 0)))
                     ->make(true);
         }
 
@@ -98,11 +101,11 @@ class RecordController extends Controller
             // جلب بيانات المستخدمين من الجدول
             $records = $this->filteredRecordsQuery($request, 1);
             // التصفية بناءً على التواريخ
-            if ($request->from_date != null && $request->to_date != null) {
+            if ($request->from_date != null && $request->to_date != null && $this->columnAllowed('date')) {
                 $records->whereBetween('date', [$request->from_date, $request->to_date]);
             }
 
-            if ($request->from_age != null && $request->to_age != null) {
+            if ($request->from_age != null && $request->to_age != null && $this->columnAllowed('age')) {
                 $records->whereBetween('age', [$request->from_age, $request->to_age]);
             }
 
@@ -110,7 +113,7 @@ class RecordController extends Controller
                 $records->whereNull($request->fieldNull);
             }
 
-            return DataTables::of($records)
+            return $this->restrictDataTable(DataTables::of($records)
                     ->addIndexColumn()  // إضافة عمود الترقيم التلقائي
                     ->addColumn('financier', fn ($record) => $record->financier_name)
                     ->addColumn('displacement_status_label', fn ($record) => $record->displacement_status_label)
@@ -119,6 +122,8 @@ class RecordController extends Controller
                     ->addColumn('distributed_label', fn ($record) => $record->distributed_label)
                     ->addColumn('branch_name', fn ($record) => $record->branch_name_sql)
                     ->addColumn('eligible_label', fn ($record) => $record->eligible_label)
+                    ->addColumn('management_status_label', fn ($record) => $record->management_status_label)
+                    ->addColumn('management_notes', fn ($record) => $record->management_notes)
                     ->addColumn('edit', function ($record) {
                         return $record->id;
                     })
@@ -128,7 +133,7 @@ class RecordController extends Controller
                     ->addColumn('delete', function ($record) {
                         return $record->id;
                     })
-                    ->with($this->dataTableMeta($request, 1))
+                    ->with($this->dataTableMeta($request, 1)))
                     ->make(true);
         }
 
@@ -181,7 +186,7 @@ class RecordController extends Controller
             'user_id' => $request->user()->id,
             'user_name' => $request->user()->name
         ]);
-        Record::create($request->except(['eligible', 'branch_notes']));
+        Record::create($request->except(['eligible', 'branch_notes', 'management_status', 'management_notes']));
         if($request->ajax()) {
             return response()->json(['message' => 'تم الإضافة بنجاح']);
         }
@@ -194,6 +199,21 @@ class RecordController extends Controller
     public function edit(Request $request, Record $record)
     {
         $this->authorize('update', Record::class);
+        $allowed = $request->user()->allowedRecordColumns();
+        if ($allowed !== null) {
+            // مستخدم مقيّد: لا يحصل إلا على الحقول المسموحة له + ما يلزم لنافذة التعديل (يستحق، ملاحظات الفرع)
+            abort_unless($request->ajax(), 403);
+            $map = ['eligible_label' => 'eligible', 'branch_name' => 'branch_id', 'management_status' => 'management_status'];
+            $keys = ['id', 'name', 'eligible', 'branch_notes', 'branch_id'];
+            foreach ($allowed as $column) {
+                $keys[] = $map[$column] ?? $column;
+            }
+            if ($request->user()->can('management', Record::class)) {
+                $keys[] = 'management_status';
+                $keys[] = 'management_notes';
+            }
+            return response()->json($record->only(array_unique($keys)));
+        }
         if($request->ajax()) {
             $record->user = $record->user;
             return response()->json($record);
@@ -219,7 +239,7 @@ class RecordController extends Controller
                 'branch_notes' => ['nullable', 'string', 'max:2000'],
             ]);
             $data['eligible'] = $request->input('eligible') === '' ? null : $request->input('eligible');
-            $record->update($data);
+            $record->update($data + $this->managementFields($request));
             return $request->ajax()
                 ? response()->json(['message' => 'تم التحديث بنجاح'])
                 : redirect()->route('records.index')->with('success', 'تم تعديل بيانات المريض');
@@ -240,11 +260,33 @@ class RecordController extends Controller
         $request->merge([
             'done' => $request->done ? 1 : 0,
         ]);
-        $record->update($request->except(['eligible', 'branch_notes']));
+        $record->update($request->except(['eligible', 'branch_notes', 'management_status', 'management_notes']) + $this->managementFields($request));
         if($request->ajax()) {
             return response()->json(['message' => 'تم التحديث بنجاح']);
         }
         return redirect()->route('records.index')->with('success', 'تم تعديل بيانات المريض');
+    }
+
+    /**
+     * تحديث حالة موافقة الإدارة وملاحظاتها (الطريقة الوحيدة لتعديل هذين الحقلين).
+     */
+    public function management(Request $request, Record $record)
+    {
+        $this->authorize('management', Record::class);
+        $request->merge(['management_status' => $request->input('management_status') === '' ? null : $request->input('management_status')]);
+        $data = $request->validate([
+            'management_status' => ['nullable', Rule::in(array_keys(Record::MANAGEMENT_STATUSES))],
+            'management_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+        $record->update([
+            'management_status' => $data['management_status'] ?? null,
+            'management_notes' => $data['management_notes'] ?? null,
+        ]);
+        return response()->json([
+            'status' => $record->management_status,
+            'status_label' => $record->management_status_label,
+            'notes' => $record->management_notes,
+        ]);
     }
 
     /**
@@ -281,17 +323,18 @@ class RecordController extends Controller
         $data = $request->filled('filters')
             ? $this->recordRows($this->filteredRecordsQuery($this->filtersRequest($request), (int) $request->input('archived', 0))->get())->all()
             : json_decode($request->data, true);
-        // تحويل البيانات إلى collect
-        $collection = collect($data);
-        return Excel::download(new RecordsExport($collection), 'سجلات المرضى ' . Carbon::now()->format('Y-m-d H:i:s') . '.xlsx');
+        // تحويل البيانات إلى collect (مع تفريغ الأعمدة غير المسموحة لملف الأعمدة المقيّد)
+        $collection = $this->stripRows(collect($data));
+        return Excel::download(new RecordsExport($collection, (bool) auth()->user()->can('financial', Record::class) && (is_null($allowedCols = auth()->user()->allowedRecordColumns()) || in_array('amount', $allowedCols, true))), 'سجلات المرضى ' . Carbon::now()->format('Y-m-d H:i:s') . '.xlsx');
     }
 
     public function print(Request $request)
     {
         $this->authorize('export', Record::class);
-        $records = $request->filled('filters')
+        $records =$request->filled('filters')
             ? $this->recordRows($this->filteredRecordsQuery($this->filtersRequest($request), (int) $request->input('archived', 0))->get())->all()
             : json_decode($request->data, true); // 'true' لتحويلها إلى مصفوفة
+        $records = $this->stripRows(collect($records))->all();
         $recordsCollection = collect($records); // تحويل المصفوفة إلى Collection
         $financiers_numbers = $recordsCollection->pluck('financier_number')->unique()->toArray();
         $financiers = Financier::whereIn('financier_number', $financiers_numbers)->pluck('name')->toArray();
@@ -343,7 +386,7 @@ class RecordController extends Controller
     {
         $this->authorize('view', Record::class);
         $column = $request->string('column')->toString();
-        if (! array_key_exists($column, $this->filterableColumns())) {
+        if (! array_key_exists($column, $this->filterableColumns()) || ! $this->columnAllowed($column)) {
             return response()->json(['values' => [], 'truncated' => false]);
         }
 
@@ -360,10 +403,10 @@ class RecordController extends Controller
         if ($request->filled('year') && $request->input('year') !== 'all') {
             $query->whereYear('records.date', (int) $request->input('year'));
         }
-        if ($request->filled('from_date')) $query->whereDate('records.date', '>=', $request->input('from_date'));
-        if ($request->filled('to_date')) $query->whereDate('records.date', '<=', $request->input('to_date'));
-        if ($request->filled('from_age')) $query->where('records.age', '>=', (int) $request->input('from_age'));
-        if ($request->filled('to_age')) $query->where('records.age', '<=', (int) $request->input('to_age'));
+        if ($request->filled('from_date') && $this->columnAllowed('date')) $query->whereDate('records.date', '>=', $request->input('from_date'));
+        if ($request->filled('to_date') && $this->columnAllowed('date')) $query->whereDate('records.date', '<=', $request->input('to_date'));
+        if ($request->filled('from_age') && $this->columnAllowed('age')) $query->where('records.age', '>=', (int) $request->input('from_age'));
+        if ($request->filled('to_age') && $this->columnAllowed('age')) $query->where('records.age', '<=', (int) $request->input('to_age'));
         $this->applyColumnFilters($query, $request->input('filters', []));
         $query->whereNotNull($expr)->where($expr, '<>', '');
         if ($request->filled('q')) {
@@ -399,14 +442,15 @@ class RecordController extends Controller
         if ($request->filled('year') && $request->input('year') !== 'all') {
             $query->whereYear('records.date', (int) $request->input('year'));
         }
-        if ($request->filled('from_date')) $query->whereDate('records.date', '>=', $request->input('from_date'));
-        if ($request->filled('to_date')) $query->whereDate('records.date', '<=', $request->input('to_date'));
-        if ($request->filled('from_age')) $query->where('records.age', '>=', (int) $request->input('from_age'));
-        if ($request->filled('to_age')) $query->where('records.age', '<=', (int) $request->input('to_age'));
+        if ($request->filled('from_date') && $this->columnAllowed('date')) $query->whereDate('records.date', '>=', $request->input('from_date'));
+        if ($request->filled('to_date') && $this->columnAllowed('date')) $query->whereDate('records.date', '<=', $request->input('to_date'));
+        if ($request->filled('from_age') && $this->columnAllowed('age')) $query->where('records.age', '>=', (int) $request->input('from_age'));
+        if ($request->filled('to_age') && $this->columnAllowed('age')) $query->where('records.age', '<=', (int) $request->input('to_age'));
         if ($request->filled('q')) {
             $like = '%'.$this->escapeLike($request->input('q')).'%';
             $query->where(function (Builder $q) use ($like) {
                 foreach (['name', 'patient_ID', 'phone_number1', 'phone_number2', 'operation', 'doctor', 'anesthesia', 'financier_number', 'address', 'notes'] as $column) {
+                    if (! $this->columnAllowed($column)) continue;
                     $q->orWhere('records.'.$column, 'like', $like);
                 }
             });
@@ -419,7 +463,7 @@ class RecordController extends Controller
         if (is_string($filters)) $filters = json_decode($filters, true) ?: [];
         foreach ((array) $filters as $column => $value) {
             $types = $this->filterableColumns();
-            if (! isset($types[$column])) continue;
+            if (! isset($types[$column]) || ! $this->columnAllowed($column)) continue;
             $qualified = $this->columnExpression($column);
             $filter = is_array($value) ? $value : ['values' => [$value]];
             // Enum/boolean UI filters use a scalar `value`; list filters use `values`.
@@ -432,6 +476,8 @@ class RecordController extends Controller
                 $values = array_values(array_intersect(array_map('strval', $values), ['0', '1']));
             } elseif ($types[$column] === 'displacement_status') {
                 $values = array_values(array_intersect($values, array_keys(Record::DISPLACEMENT_STATUSES)));
+            } elseif ($types[$column] === 'management_status') {
+                $values = array_values(array_intersect($values, array_keys(Record::MANAGEMENT_STATUSES)));
             } elseif ($types[$column] === 'income_status') {
                 $values = array_values(array_intersect($values, array_keys(Record::INCOME_STATUSES)));
             } elseif ($types[$column] === 'family_burden') {
@@ -456,7 +502,7 @@ class RecordController extends Controller
 
     private function filterableColumns(): array
     {
-        return ['name' => 'list', 'financier_number' => 'list', 'address' => 'list', 'patient_ID' => 'list', 'operation' => 'list', 'doctor' => 'list', 'anesthesia' => 'list', 'user_name' => 'list', 'financier' => 'list', 'phone_number1' => 'list', 'phone_number2' => 'list', 'amount' => 'list', 'doctor_share' => 'list', 'anesthesiologists_share' => 'list', 'bed' => 'list', 'private' => 'list', 'notes' => 'list', 'notes_2' => 'list', 'branch_name' => 'list', 'branch_notes' => 'list', 'displacement_status' => 'displacement_status', 'income_status' => 'income_status', 'family_burden' => 'family_burden', 'done' => 'boolean', 'distributed' => 'boolean', 'eligible' => 'boolean'];
+        return ['name' => 'list', 'financier_number' => 'list', 'address' => 'list', 'patient_ID' => 'list', 'operation' => 'list', 'doctor' => 'list', 'anesthesia' => 'list', 'user_name' => 'list', 'financier' => 'list', 'phone_number1' => 'list', 'phone_number2' => 'list', 'amount' => 'list', 'doctor_share' => 'list', 'anesthesiologists_share' => 'list', 'bed' => 'list', 'private' => 'list', 'notes' => 'list', 'notes_2' => 'list', 'branch_name' => 'list', 'branch_notes' => 'list', 'management_status' => 'management_status', 'management_notes' => 'list', 'displacement_status' => 'displacement_status', 'income_status' => 'income_status', 'family_burden' => 'family_burden', 'done' => 'boolean', 'distributed' => 'boolean', 'eligible' => 'boolean'];
     }
 
     private function dataTableMeta(Request $request, int $archived): array
@@ -468,7 +514,41 @@ class RecordController extends Controller
             $totalsQuery->reorder()->getQuery()->columns = null;
             $meta['totals'] = $totalsQuery->selectRaw('COALESCE(SUM(records.amount),0) amount, COALESCE(SUM(records.doctor_share),0) doctor_share, COALESCE(SUM(records.anesthesiologists_share),0) anesthesiologists_share, COALESCE(SUM(records.bed),0) bed, COALESCE(SUM(records.private),0) private')->first()->toArray();
         }
+        $meta['totals'] = array_intersect_key($meta['totals'], array_flip(array_filter(array_keys($meta['totals']), fn ($key) => $this->columnAllowed($key))));
         return $meta;
+    }
+
+    /** null = بلا قيود؛ وإلا قائمة الأعمدة المسموحة لملف الأعمدة المقيّد (انظر User::allowedRecordColumns). */
+    private function allowedColumns(): ?array
+    {
+        return auth()->user()?->allowedRecordColumns();
+    }
+
+    /** هل العمود (أو مفتاح الفلتر) مسموح للمستخدم الحالي؟ */
+    private function columnAllowed(string $key): bool
+    {
+        $allowed = $this->allowedColumns();
+        return $allowed === null || in_array(ColumnProfile::columnForFilter($key), $allowed, true);
+    }
+
+    /** إزالة قيم الأعمدة غير المسموحة من مخرجات DataTables (تبقى المفاتيح فارغة كي لا يشتكي JS). */
+    private function restrictDataTable($table)
+    {
+        $allowed = $this->allowedColumns();
+        if ($allowed !== null) {
+            foreach (array_diff(array_keys(ColumnProfile::COLUMNS), $allowed) as $column) {
+                foreach (ColumnProfile::dataKeys($column) as $key) {
+                    $table->editColumn($key, fn () => null);
+                }
+            }
+        }
+        return $table;
+    }
+
+    private function stripRows(Collection $rows): Collection
+    {
+        $allowed = $this->allowedColumns();
+        return $allowed === null ? $rows : $rows->map(fn ($row) => ColumnProfile::stripRow((array) $row, $allowed));
     }
 
     private function recordYears(int $archived): array
@@ -487,10 +567,27 @@ class RecordController extends Controller
         return Request::create('/', 'GET', array_merge($request->only(['year', 'q', 'from_date', 'to_date', 'from_age', 'to_age']), ['filters' => $filters]));
     }
 
+    /** حقول موافقة الإدارة تُقبل فقط من مستخدم يملك صلاحية records.management، وإلا تُتجاهل. */
+    private function managementFields(Request $request): array
+    {
+        if (! $request->user()->can('management', Record::class) || ! $request->hasAny(['management_status', 'management_notes'])) {
+            return [];
+        }
+        $data = $request->validate([
+            'management_status' => ['nullable', Rule::in(array_keys(Record::MANAGEMENT_STATUSES))],
+            'management_notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        return [
+            'management_status' => $data['management_status'] ?? null,
+            'management_notes' => $data['management_notes'] ?? null,
+        ];
+    }
+
     private function recordRows(Collection $records): Collection
     {
         return $records->values()->map(function (Record $record, int $index) {
-            return array_merge($record->toArray(), ['DT_RowIndex' => $index + 1, 'financier' => $record->financier_name, 'branch_name' => $record->branch_name_sql, 'displacement_status_label' => $record->displacement_status_label, 'income_status_label' => $record->income_status_label, 'family_burden_label' => $record->family_burden_label, 'distributed_label' => $record->distributed_label, 'eligible_label' => $record->eligible_label]);
+            return array_merge($record->toArray(), ['DT_RowIndex' => $index + 1, 'financier' => $record->financier_name, 'branch_name' => $record->branch_name_sql, 'displacement_status_label' => $record->displacement_status_label, 'income_status_label' => $record->income_status_label, 'family_burden_label' => $record->family_burden_label, 'distributed_label' => $record->distributed_label, 'eligible_label' => $record->eligible_label, 'management_status_label' => $record->management_status_label]);
         });
     }
 

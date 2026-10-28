@@ -41,6 +41,8 @@ class RecordFactory extends Factory
             'branch_id' => null,
             'eligible' => null,
             'branch_notes' => null,
+            'management_status' => null,
+            'management_notes' => null,
             'user_id' => 1,
             'user_name' => 'saeyd_jamal',
         ];

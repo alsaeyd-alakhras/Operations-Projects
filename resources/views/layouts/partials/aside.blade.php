@@ -53,6 +53,14 @@
                 </a>
             </li>
             @endcan
+            @can('view','App\\Models\ColumnProfile')
+            <li class="nav-item w-100">
+                <a class="nav-link" href="{{route('column-profiles.index')}}">
+                    <i class="fe fe-columns fe-16"></i>
+                    <span class="ml-3 item-text">الأدوار (ملفات الأعمدة)</span>
+                </a>
+            </li>
+            @endcan
             @can('view','App\\Models\Logs')
             <li class="nav-item w-100">
                 <a class="nav-link" href="{{route('logs.index')}}">

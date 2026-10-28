@@ -42,6 +42,17 @@
                         @endforeach
                     </select>
                 </div>
+
+                <div class="form-group col-md-4">
+                    <label for="column_profile_id">ملف الأعمدة</label>
+                    <select name="column_profile_id" id="column_profile_id" class="form-control">
+                        <option value="">بدون ملف (كل الأعمدة)</option>
+                        @foreach (\Illuminate\Support\Facades\Schema::hasTable('column_profiles') ? \App\Models\ColumnProfile::orderBy('name')->get() : [] as $profile)
+                            <option value="{{ $profile->id }}" @selected(old('column_profile_id', $user->column_profile_id) == $profile->id)>{{ $profile->name }}{{ $profile->restricted ? ' (مقيّد)' : '' }}</option>
+                        @endforeach
+                    </select>
+                    @error('column_profile_id')<small class="text-danger">{{ $message }}</small>@enderror
+                </div>
             </div>
         </section>
         <section class="rec-section">

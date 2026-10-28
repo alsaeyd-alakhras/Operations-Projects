@@ -98,9 +98,88 @@
                 } },
                 columns: config.columns
             });
-            (config.financialColumns || []).forEach(function (name) {
-                if (!config.canFinancial) table.column(name + ':name').visible(false);
+            // العدد + عدد الصفوف في الصفحة يظهران أسفل الجدول بجانب معلومات الصفحة، والتنقل بين الصفحات في الجهة المقابلة
+            $('.rec-foot-meta').remove();
+            var $meta = $('<div class="rec-foot-meta"></div>')
+                .append('<span class="rec-count" id="nav_count" title="عدد السجلات"><i class="fe fe-database"></i><b>0</b></span>')
+                .append('<label class="rec-pagelen" for="rec-page-length">صفوف/صفحة</label><select id="rec-page-length" class="rec-select" title="عدد الصفوف في الصفحة" aria-label="عدد الصفوف في الصفحة"><option value="50">50</option><option value="100">100</option><option value="200">200</option><option value="500">500</option></select>');
+            $meta.find('#rec-page-length').val(String(table.page.len()));
+            function placeMeta() {
+                if ($table.closest('.dt-container').find('.rec-foot-meta').length) return;
+                $table.closest('.dt-container').find('.dt-layout-row:not(.dt-layout-table) .dt-layout-start').first().prepend($meta);
+            }
+            placeMeta();
+            $table.on('init.dt draw.dt', placeMeta);
+            // ===== إعدادات الأعمدة (إظهار/إخفاء) =====
+            var storageKey = config.storageKey || ('rec-cols:' + (config.userId || 0) + ':' + (config.archived ? 'archived' : 'index'));
+            var lockedCols = ['actions', 'name'];
+            var financialCols = config.financialColumns || [];
+            var allowedCols = $.isArray(config.allowedColumns) ? config.allowedColumns : null;
+            var colNames = config.columns.map(function (c) { return c.name; });
+            function isAvailable(name) {
+                if (name === 'actions') return true;
+                if (!config.canFinancial && financialCols.indexOf(name) !== -1) return false;
+                if (allowedCols && allowedCols.indexOf(name) === -1) return false;
+                return true;
+            }
+            function toggleable(name) { return lockedCols.indexOf(name) === -1 && isAvailable(name); }
+            function defaultHidden() { return (config.defaultHidden || []).slice(); }
+            function readHidden() {
+                try {
+                    var raw = window.localStorage.getItem(storageKey);
+                    if (raw !== null) { var saved = JSON.parse(raw); if ($.isArray(saved)) return saved; }
+                } catch (e) { /* التخزين غير متاح */ }
+                return defaultHidden();
+            }
+            function writeHidden(hidden) { try { window.localStorage.setItem(storageKey, JSON.stringify(hidden)); } catch (e) { /* ignore */ } }
+            function updateFiller() {
+                var count = table.columns().visible().toArray().filter(Boolean).length;
+                $table.children('tbody').children('.rec-filler').children('td').attr('colspan', count);
+            }
+            function applyVisibility(hidden) {
+                colNames.forEach(function (name) {
+                    var show = isAvailable(name) && (lockedCols.indexOf(name) !== -1 || hidden.indexOf(name) === -1);
+                    table.column(name + ':name').visible(show, false);
+                });
+                updateFiller();
+            }
+            // عناوين الأعمدة تُقرأ قبل الإخفاء: header() لعمود مخفي يرجع undefined ويكسر باقي التهيئة
+            var colLabels = {};
+            var $ths = $table.find('thead th');
+            colNames.forEach(function (name, i) {
+                var th = $ths.eq(i);
+                colLabels[name] = $.trim($(th).find('.d-flex > span').first().text()) || $(th).data('label') || $.trim($(th).text()) || name;
             });
+            var hiddenCols = readHidden();
+            applyVisibility(hiddenCols);
+            (function buildColumnsMenu() {
+                var $anchor = $('#records-search-reset').closest('li');
+                if (!$anchor.length) return;
+                var $list = $('<div class="rec-cols-list"></div>');
+                colNames.filter(toggleable).forEach(function (name) {
+                    var label = colLabels[name];
+                    $('<label>').append($('<input>', { type: 'checkbox', 'data-col': name }))
+                        .append($('<span>').text(label)).appendTo($list);
+                });
+                var $item = $('<li class="nav-item dropdown mx-1 d-flex align-items-center rec-cols"></li>')
+                    .append('<button class="rec-tool" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="اختيار الأعمدة الظاهرة" aria-label="الأعمدة"><i class="fe fe-columns"></i><span class="ml-1">الأعمدة</span></button>')
+                    .append($('<div class="dropdown-menu dropdown-menu-right rec-menu rec-cols-menu"></div>')
+                        .append('<div class="rec-cols-head"><button type="button" class="rec-cols-showall">عرض الكل</button><button type="button" class="rec-cols-default">الافتراضي</button></div>')
+                        .append($list));
+                $item.insertBefore($anchor);
+                function syncChecks() { $item.find('input[data-col]').each(function () { $(this).prop('checked', hiddenCols.indexOf($(this).data('col')) === -1); }); }
+                function commit() { applyVisibility(hiddenCols); writeHidden(hiddenCols); syncChecks(); }
+                syncChecks();
+                $item.on('click', '.rec-cols-menu', function (event) { event.stopPropagation(); });
+                $item.on('change', 'input[data-col]', function () {
+                    var name = String($(this).data('col')), i = hiddenCols.indexOf(name);
+                    if (this.checked && i !== -1) hiddenCols.splice(i, 1);
+                    if (!this.checked && i === -1) hiddenCols.push(name);
+                    commit();
+                });
+                $item.on('click', '.rec-cols-showall', function () { hiddenCols = []; commit(); });
+                $item.on('click', '.rec-cols-default', function () { hiddenCols = defaultHidden(); commit(); });
+            }());
             $table.on('processing.dt', function (_, __, processing) { $table.closest('.rec-card').toggleClass('rec-is-loading', !!processing); });
             $table.on('xhr.dt', function (_, __, json) {
                 if (!json) return;
@@ -111,7 +190,7 @@
                 });
             });
             $table.on('draw.dt', function () {
-                // صف حشو يمتص المساحة الفارغة: الجدول يملأ الحاوية (المجاميع بالأسفل) بدون تمطيط صفوف البيانات
+                // صف حشو يمتص المساحة الفارغة: الجدول يملأ الحاوية (المجاميع بالأسفل) بدون تمطيط صفوف البيانات (الأعمدة المخفية مستبعدة)
                 var columnsCount = table.columns().visible().toArray().filter(Boolean).length;
                 $table.children('tbody').children('.rec-filler').remove();
                 $table.children('tbody').append($('<tr class="rec-filler" aria-hidden="true"></tr>').append($('<td>', { colspan: columnsCount })));
@@ -188,7 +267,93 @@
                     if (isExcel) $form.trigger('submit'); else $('#printReport').modal('show');
                 });
             updateIndicators();
+            RecordsTable.table = table;
             return table;
         }
+    };
+    // ===== إشعار صغير =====
+    function esc(text) { return $('<div>').text(text === null || text === undefined ? '' : text).html(); }
+    RecordsTable.toast = function (message, type) {
+        var $box = $('#rec-toasts');
+        if (!$box.length) $box = $('<div id="rec-toasts" class="rec-toasts" role="status" aria-live="polite"></div>').appendTo('body');
+        var $t = $('<div class="rec-toast"></div>').addClass(type === 'error' ? 'rec-toast--error' : 'rec-toast--ok').text(message).appendTo($box);
+        setTimeout(function () { $t.fadeOut(250, function () { $t.remove(); }); }, 2600);
+    };
+
+    // ===== عمود موافقة الإدارة =====
+    // opts: { canManage: bool, url: '.../records/:id/management', csrf: '...' }
+    var MGMT = {
+        '': { label: 'لم يحدد', cls: 'gray' },
+        pending: { label: 'قيد الانتظار', cls: 'amber' },
+        approved: { label: 'موافق', cls: 'green' },
+        rejected: { label: 'مرفوض', cls: 'red' }
+    };
+    RecordsTable.managementColumn = function (opts) {
+        function rowId(row) { return row.id !== undefined && row.id !== null ? row.id : (row.edit || row.archived || row.delete); }
+        function info(row) { var key = row.management_status || ''; return $.extend({ key: key }, MGMT[key] || MGMT['']); }
+        function html(row) {
+            var st = info(row), label = row.management_status_label || st.label;
+            if (!opts.canManage) return '<span class="rec-chip rec-chip--' + st.cls + '">' + esc(label) + '</span>';
+            var options = Object.keys(MGMT).map(function (key) {
+                return '<option value="' + key + '"' + (key === st.key ? ' selected' : '') + '>' + MGMT[key].label + '</option>';
+            }).join('');
+            var hasNotes = $.trim(row.management_notes || '') !== '';
+            return '<span class="rec-mgmt"><select class="rec-mgmt-select rec-chip rec-chip--' + st.cls + '" data-id="' + esc(rowId(row)) + '" aria-label="حالة موافقة الإدارة">' + options + '</select>' +
+                '<button type="button" class="rec-mgmt-note' + (hasNotes ? ' has-notes' : '') + '" data-id="' + esc(rowId(row)) + '" title="' + (hasNotes ? esc(row.management_notes) : 'ملاحظات الإدارة') + '" aria-label="ملاحظات الإدارة"><i class="fe fe-message-square"></i></button></span>';
+        }
+        function ctx($el) {
+            var $td = $el.closest('td'), row = RecordsTable.table.row($el.closest('tr'));
+            return { $td: $td, data: row.data() };
+        }
+        function save(c, status, notes, onFail) {
+            var d = c.data, id = rowId(d);
+            return $.ajax({ url: opts.url.replace(':id', id), method: 'POST', dataType: 'json', headers: { 'X-CSRF-TOKEN': opts.csrf }, data: { management_status: status, management_notes: notes } })
+                .done(function (res) {
+                    res = res || {};
+                    d.management_status = (res.status !== undefined ? res.status : status) || null;
+                    d.management_status_label = res.status_label || MGMT[d.management_status || ''].label;
+                    d.management_notes = res.notes !== undefined ? res.notes : notes;
+                    c.$td.html(html(d));
+                    RecordsTable.toast('تم حفظ موافقة الإدارة');
+                })
+                .fail(function () { if (onFail) onFail(); RecordsTable.toast('تعذر حفظ موافقة الإدارة', 'error'); });
+        }
+        var $pop = null, popCtx = null;
+        function closePop() { if ($pop) $pop.remove(); $pop = null; popCtx = null; }
+        if (opts.canManage) {
+            $(document).off('.recmgmt')
+                .on('change.recmgmt', '.rec-mgmt-select', function () {
+                    var $s = $(this), c = ctx($s), prev = c.data.management_status || '';
+                    $s.prop('disabled', true);
+                    save(c, $s.val(), c.data.management_notes || '', function () { $s.val(prev); }).always(function () { $s.prop('disabled', false); });
+                })
+                .on('click.recmgmt', '.rec-mgmt-note', function (event) {
+                    var $b = $(this), same = popCtx && popCtx.$btn[0] === this;
+                    closePop();
+                    if (same) return;
+                    popCtx = $.extend(ctx($b), { $btn: $b });
+                    $pop = $('<div class="rec-mgmt-pop" dir="rtl"><label>ملاحظات الإدارة</label><textarea rows="4" maxlength="2000"></textarea>' +
+                        '<div class="rec-mgmt-pop-foot"><button type="button" class="rec-mgmt-cancel">إلغاء</button><button type="button" class="rec-mgmt-save">حفظ</button></div></div>').appendTo('body');
+                    $pop.find('textarea').val(popCtx.data.management_notes || '').trigger('focus');
+                    var r = this.getBoundingClientRect(), w = $pop.outerWidth(), h = $pop.outerHeight();
+                    var left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+                    var top = r.bottom + 6 + h > window.innerHeight ? Math.max(8, r.top - h - 6) : r.bottom + 6;
+                    $pop.css({ left: left, top: top });
+                })
+                .on('click.recmgmt', '.rec-mgmt-cancel', closePop)
+                .on('click.recmgmt', '.rec-mgmt-save', function () {
+                    if (!popCtx) return;
+                    var c = popCtx, notes = $.trim($pop.find('textarea').val()), $btn = $(this).prop('disabled', true);
+                    save(c, c.data.management_status || '', notes).done(closePop).always(function () { $btn.prop('disabled', false); });
+                })
+                .on('click.recmgmt', function (event) { if (!$(event.target).closest('.rec-mgmt-pop, .rec-mgmt-note').length) closePop(); })
+                .on('keydown.recmgmt', function (event) { if (event.key === 'Escape') closePop(); });
+        }
+        return {
+            data: 'management_status', name: 'management_status', orderable: false, searchable: false,
+            render: function (data, type, row) {
+                return type === 'display' ? html(row) : (row.management_status_label || info(row).label);
+            }
+        };
     };
 }(jQuery));

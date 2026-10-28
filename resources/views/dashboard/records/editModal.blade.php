@@ -95,6 +95,21 @@
                 <label for="branch_notes">ملاحظات الفرع</label>
                 <textarea name="branch_notes" id="branch_notes" rows="2" class="form-control form-control-alternative" {{ auth()->user()->isBranchUser() ? '' : 'disabled' }}></textarea>
             </div>
+            @can('management','App\\Models\Record')
+            <div class="form-group col-md-3">
+                <label for="management_status">حالة موافقة الإدارة</label>
+                <select name="management_status" id="management_status" class="form-control form-control-alternative">
+                    <option value="">لم يحدد</option>
+                    @foreach (App\Models\Record::MANAGEMENT_STATUSES as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group col-md-9">
+                <label for="management_notes">ملاحظات الإدارة</label>
+                <textarea name="management_notes" id="management_notes" rows="2" class="form-control form-control-alternative"></textarea>
+            </div>
+            @endcan
         </div>
     </section>
 

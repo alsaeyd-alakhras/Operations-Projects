@@ -88,7 +88,7 @@
         <table class="blueTable">
             <thead>
                 <tr>
-                    <td colspan="19" style="border:0;">
+                    <td colspan="11" style="border:0;">
                         <p>
                             <span>مستشفى يافا الطبي</span> /
                             <span>مشروع إجراء عمليات جراحية وتدخلات طبية</span> /
@@ -101,7 +101,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="19" align="center" style="color: #000;border:0;">
+                    <td colspan="11" align="center" style="color: #000;border:0;">
                         <h1>مشروع العمليات الطبية</h1>
                     </td>
                 </tr>
@@ -113,10 +113,6 @@
                     <!-- <th>رقم <br> الممول</th> -->
                     <!-- <th>الممول</th> -->
                     <th>السكن</th>
-                    <th>حالة النزوح والسكن وتضرر البيت</th>
-                    <th>مصادر الدخل والوضع المالي</th>
-                    <th>حجم الأسرة والحالات الخاصة</th>
-                    <th>تم التوزيع</th>
                     <th>العمر</th>
                     <th>الهوية</th>
                     <th>جوال 1</th>
@@ -142,10 +138,6 @@
                         <!-- <td style="text-align: center;">{{$record['financier_number']}}</td> -->
                         <!-- <td>{{ App\Models\Financier::where('financier_number',$record['financier_number'])->first() ? App\Models\Financier::where('financier_number',$record['financier_number'])->first()->name : '---'  }}</td> -->
                         <td>{{$record['address']}}</td>
-                        <td>{{ \App\Models\Record::DISPLACEMENT_STATUSES[$record['displacement_status'] ?? null] ?? '' }}</td>
-                        <td>{{ \App\Models\Record::INCOME_STATUSES[$record['income_status'] ?? null] ?? '' }}</td>
-                        <td>{{ \App\Models\Record::FAMILY_BURDENS[$record['family_burden'] ?? null] ?? '' }}</td>
-                        <td>{{ array_key_exists('distributed', $record) && !is_null($record['distributed']) ? ($record['distributed'] ? 'نعم' : 'لا') : '' }}</td>
                         <td>{{$record['age']}}</td>
                         <td>{{$record['patient_ID']}}</td>
                         <td>{{$record['phone_number1']}}</td>
@@ -161,7 +153,7 @@
             <tfoot>
                 <tr>
                     <td>00</td>
-                    <td colspan="15">المجموع</td>
+                    <td colspan="11">المجموع</td>
                     <td>{{number_format($recordsTotalArray['amount'])}}</td>
                     <td></td>
                     <td></td>

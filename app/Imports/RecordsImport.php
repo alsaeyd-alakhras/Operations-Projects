@@ -50,6 +50,8 @@ class RecordsImport implements ToModel,WithHeadingRow
             'family_burden' => $this->choice($row, ['hjm_alasr_walhalat_alkhas', 'family_burden'], Record::FAMILY_BURDENS),
             'distributed' => $this->distributed($row),
             'branch_id' => $this->branch($row),
+            'management_status' => $this->choice($row, ['hal_mwafk_alidar', 'hal_mwafk_aladar', 'management_status'], Record::MANAGEMENT_STATUSES),
+            'management_notes' => $row['mlahthat_aladar'] ?? $row['mlahthat_alidar'] ?? $row['management_notes'] ?? null,
         ]);
     }
 

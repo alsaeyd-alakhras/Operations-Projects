@@ -20,6 +20,12 @@ class Record extends Model
         'resident_safe' => 'مقيم في منزل سليم',
     ];
 
+    public const MANAGEMENT_STATUSES = [
+        'pending' => 'قيد الانتظار',
+        'approved' => 'موافق',
+        'rejected' => 'مرفوض',
+    ];
+
     public const INCOME_STATUSES = [
         'unemployed' => 'عاطل عن العمل',
         'gaza_gov_or_daily' => 'موظف في حكومة غزة أو عامل يومي',
@@ -61,6 +67,8 @@ class Record extends Model
         'branch_id',
         'eligible',
         'branch_notes',
+        'management_status',
+        'management_notes',
     ];
 
     protected $casts = [
@@ -81,6 +89,11 @@ class Record extends Model
     public function getDisplacementStatusLabelAttribute(): ?string
     {
         return self::DISPLACEMENT_STATUSES[$this->displacement_status] ?? null;
+    }
+
+    public function getManagementStatusLabelAttribute(): string
+    {
+        return self::MANAGEMENT_STATUSES[$this->management_status] ?? 'لم يحدد';
     }
 
     public function getIncomeStatusLabelAttribute(): ?string

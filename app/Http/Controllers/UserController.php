@@ -19,7 +19,7 @@ class UserController extends Controller
     public function index()
     {
         $this->authorize('view', User::class);
-        $users = User::with('branch')->paginate(10);
+        $users = User::with(['branch', 'columnProfile'])->paginate(10);
         return view('dashboard.users.index', compact('users'));
     }
 
@@ -44,6 +44,7 @@ class UserController extends Controller
             'name' => 'required',
             'username' => 'required|string|unique:users,username',
             'branch_id' => 'nullable|exists:branches,id',
+            'column_profile_id' => 'nullable|exists:column_profiles,id',
             'password' => 'required|same:confirm_password',
             'confirm_password' => 'required|same:password',
         ],[
@@ -52,7 +53,7 @@ class UserController extends Controller
         ]);
         DB::beginTransaction();
         try{
-            $user = User::create(array_merge($request->all(), ['branch_id' => $request->branch_id ?: null]));
+            $user = User::create(array_merge($request->all(), ['branch_id' => $request->branch_id ?: null, 'column_profile_id' => $request->column_profile_id ?: null]));
             foreach ($request->abilities ?? [] as $role) {
                 RoleUser::create([
                     'role_name' => $role,
@@ -96,6 +97,7 @@ class UserController extends Controller
             'name' => 'required',
             'username' => 'required|string|unique:users,username,'.$user->id,
             'branch_id' => 'nullable|exists:branches,id',
+            'column_profile_id' => 'nullable|exists:column_profiles,id',
         ]);
         DB::beginTransaction();
         try{
@@ -107,6 +109,7 @@ class UserController extends Controller
                 'username' => $request->username,
                 'email' => $request->email,
                 'branch_id' => $request->branch_id ?: null,
+                'column_profile_id' => $request->column_profile_id ?: null,
             ]);
             if ($request->abilities != null) {
                 $role_old = RoleUser::where('user_id', $user->id)->pluck('role_name')->toArray();

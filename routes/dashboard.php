@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\ColumnProfileController;
 use App\Http\Controllers\FinancierController;
 use App\Http\Controllers\LogsController;
 use App\Http\Controllers\RecordController;
@@ -22,6 +23,7 @@ Route::group([
     Route::post('records/archivedRow', [RecordController::class, 'archivedRow'])->name('records.archivedRow');
     Route::post('records/print', [RecordController::class, 'print'])->name('records.print');
     Route::post('records/import', [RecordController::class, 'import'])->name('records.import');
+    Route::post('records/{record}/management', [RecordController::class, 'management'])->name('records.management');
     Route::post('records/export', [RecordController::class, 'export'])->name('records.export');
 
     Route::post('financiers/print', [FinancierController::class, 'print'])->name('financiers.print');
@@ -35,5 +37,6 @@ Route::group([
         'financiers' => FinancierController::class,
         'users' => UserController::class,
         'branches' => BranchController::class,
+        'column-profiles' => ColumnProfileController::class,
     ]);
 });

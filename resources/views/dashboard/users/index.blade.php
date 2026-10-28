@@ -35,6 +35,7 @@
                             <th>اسم المستخدم</th>
                             <th>البريد الالكتروني</th>
                             <th>الفرع</th>
+                            <th>ملف الأعمدة</th>
                             <th>أخر موعد تواجد</th>
                             <th class="adm-flag-cell">الحدث</th>
                         </tr>
@@ -54,6 +55,7 @@
                             <td>{{ $user->username }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->branch?->name }}</td>
+                            <td>{{ $user->column_profile_id ? $user->columnProfile?->name : '' }}</td>
                             <td class="adm-num">{{ $user->last_activity }}</td>
                             <td class="adm-act">
                                 <div class="dropdown">
@@ -77,7 +79,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="adm-empty">لا يوجد مستخدمون</td>
+                            <td colspan="9" class="adm-empty">لا يوجد مستخدمون</td>
                         </tr>
                         @endforelse
                     </tbody>

@@ -55,40 +55,32 @@
                     </a>
                 </li>
                 @endcan
-                @can('view','App\\Models\User')
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-start" href="{{route('users.index')}}">
-                        <i class="fe fe-user fe-16"></i>
-                        <span class="ml-lg-2">المستخدمين</span>
+                @if (auth()->user()->can('view','App\\Models\User') || auth()->user()->can('view','App\\Models\ColumnProfile') || auth()->user()->can('view','App\\Models\Logs') || auth()->user()->can('view','App\\Models\Branch'))
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-start dropdown-toggle" href="#" id="settingsMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fe fe-settings fe-16"></i>
+                        <span class="ml-lg-2">الإعدادات</span>
                     </a>
+                    <div class="dropdown-menu dropdown-menu-right rec-menu" aria-labelledby="settingsMenu">
+                        @can('view','App\\Models\User')
+                        <a class="dropdown-item" href="{{route('users.index')}}"><i class="fe fe-user fe-16"></i> المستخدمين</a>
+                        @endcan
+                        @can('view','App\\Models\ColumnProfile')
+                        <a class="dropdown-item" href="{{route('column-profiles.index')}}"><i class="fe fe-columns fe-16"></i> الأدوار</a>
+                        @endcan
+                        @can('view','App\\Models\Branch')
+                        <a class="dropdown-item" href="{{route('branches.index')}}"><i class="fe fe-map-pin fe-16"></i> الفروع</a>
+                        @endcan
+                        @can('view','App\\Models\Logs')
+                        <a class="dropdown-item" href="{{route('logs.index')}}"><i class="fe fe-clipboard fe-16"></i> الأحداث</a>
+                        @endcan
+                    </div>
                 </li>
-                @endcan
-                @can('view','App\\Models\Branch')
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-start" href="{{route('branches.index')}}">
-                        <i class="fe fe-map-pin fe-16"></i>
-                        <span class="ml-lg-2">الفروع</span>
-                    </a>
-                </li>
-                @endcan
-                @can('view','App\\Models\Logs')
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-start" href="{{route('logs.index')}}">
-                        <i class="fe fe-clipboard fe-16"></i>
-                        <span class="ml-lg-2">الأحداث</span>
-                    </a>
-                </li>
-                @endcan
+                @endif
             </ul>
         </div>
         <ul class="navbar-nav d-flex flex-row">
             {{ $extra_nav ?? '' }}
-            <li class="nav-item">
-                <li class="nav-item">
-                    <a class="nav-link text-muted my-2" href="#" id="modeSwitcher" data-mode="light">
-                        <i class="fe fe-sun fe-16"></i>
-                    </a>
-                </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle text-muted p-0" href="#" id="navbarDropdownMenuLink"
                     role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
