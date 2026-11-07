@@ -84,6 +84,7 @@
 <th>@include('dashboard.records._th-filter', ['col' => 'bed', 'label' => 'المبيت', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'private', 'label' => 'خاص', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'address', 'label' => 'العنوان', 'type' => 'list'])</th>
+<th>@include('dashboard.records._th-filter', ['col' => 'displacement_address', 'label' => 'عنوان النزوح', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'displacement_status', 'label' => 'حالة النزوح والسكن وتضرر البيت', 'type' => 'enum', 'options' => \App\Models\Record::DISPLACEMENT_STATUSES])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'income_status', 'label' => 'مصادر الدخل والوضع المالي', 'type' => 'enum', 'options' => \App\Models\Record::INCOME_STATUSES])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'family_burden', 'label' => 'حجم الأسرة والحالات الخاصة', 'type' => 'enum', 'options' => \App\Models\Record::FAMILY_BURDENS])</th>
@@ -118,6 +119,7 @@
                                 <td class='text-white' id="total_anesthesiologists_share"></td>
                                 <td class='text-white' id="total_bed"></td>
                                 <td class='text-white' id="total_private"></td>
+                                <td></td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
@@ -318,6 +320,7 @@
                             @endcan
                         }},
                         { data: 'address', name: 'address', orderable: false},
+                        { data: 'displacement_address', name: 'displacement_address', orderable: false},
                         { data: 'displacement_status', name: 'displacement_status', orderable: false, render: function(data, type, row) { return row.displacement_status_label || ''; }},
                         { data: 'income_status', name: 'income_status', orderable: false, render: function(data, type, row) { return row.income_status_label || ''; }},
                         { data: 'family_burden', name: 'family_burden', orderable: false, render: function(data, type, row) { return row.family_burden_label || ''; }},
@@ -382,6 +385,7 @@
                     name: '',
                     financier_number: '',
                     address: '',
+                    displacement_address: '',
                     displacement_status: '',
                     income_status: '',
                     family_burden: '',
@@ -420,6 +424,7 @@
                             record.name = response.name;
                             record.financier_number = response.financier_number;
                             record.address = response.address;
+                            record.displacement_address = response.displacement_address;
                             record.displacement_status = response.displacement_status;
                             record.income_status = response.income_status;
                             record.family_burden = response.family_burden;
@@ -562,6 +567,7 @@
                             record.name = response.name;
                             record.financier_number = response.financier_number;
                             record.address = response.address;
+                            record.displacement_address = response.displacement_address;
                             record.displacement_status = response.displacement_status;
                             record.income_status = response.income_status;
                             record.family_burden = response.family_burden;

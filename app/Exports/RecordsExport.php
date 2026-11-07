@@ -75,6 +75,10 @@ class RecordsExport implements FromArray, WithHeadings, WithColumnWidths, WithCo
             $cols['address'] = ['العنوان', 28, 'wrap'];
         }
 
+        if ($this->data->contains(fn ($item) => array_key_exists('displacement_address', $item))) {
+            $cols['displacement_address'] = ['عنوان النزوح', 28, 'wrap'];
+        }
+
         return $cols + [
             'displacement_status' => ['حالة النزوح', 24, 'text'],
             'income_status'       => ['الدخل', 24, 'text'],

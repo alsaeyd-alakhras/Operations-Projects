@@ -35,6 +35,7 @@ class ColumnProfile extends Model
         'bed' => 'المبيت',
         'private' => 'خاص',
         'address' => 'العنوان',
+        'displacement_address' => 'عنوان النزوح',
         'displacement_status' => 'حالة النزوح والسكن وتضرر البيت',
         'income_status' => 'مصادر الدخل والوضع المالي',
         'family_burden' => 'حجم الأسرة والحالات الخاصة',
@@ -48,7 +49,7 @@ class ColumnProfile extends Model
     public const GROUPS = [
         'أساسية' => ['done', 'date', 'financier', 'financier_number', 'age', 'patient_ID', 'phone_number1', 'phone_number2', 'operation', 'doctor', 'eligible_label', 'branch_name', 'branch_notes', 'management_status'],
         'مالية' => ['amount', 'doctor_share', 'anesthesia', 'anesthesiologists_share', 'bed', 'private'],
-        'توزيع واجتماعية' => ['address', 'displacement_status', 'income_status', 'family_burden', 'distributed'],
+        'توزيع واجتماعية' => ['address', 'displacement_address', 'displacement_status', 'income_status', 'family_burden', 'distributed'],
         'ملاحظات' => ['notes', 'notes_2', 'user_name'],
     ];
 

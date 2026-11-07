@@ -113,6 +113,7 @@
                     <!-- <th>رقم <br> الممول</th> -->
                     <!-- <th>الممول</th> -->
                     <th>السكن</th>
+                    <th>عنوان النزوح</th>
                     <th>العمر</th>
                     <th>الهوية</th>
                     <th>جوال 1</th>
@@ -138,6 +139,7 @@
                         <!-- <td style="text-align: center;">{{$record['financier_number']}}</td> -->
                         <!-- <td>{{ App\Models\Financier::where('financier_number',$record['financier_number'])->first() ? App\Models\Financier::where('financier_number',$record['financier_number'])->first()->name : '---'  }}</td> -->
                         <td>{{$record['address']}}</td>
+                        <td>{{$record['displacement_address'] ?? ''}}</td>
                         <td>{{$record['age']}}</td>
                         <td>{{$record['patient_ID']}}</td>
                         <td>{{$record['phone_number1']}}</td>

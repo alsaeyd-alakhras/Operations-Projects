@@ -449,7 +449,7 @@ class RecordController extends Controller
         if ($request->filled('q')) {
             $like = '%'.$this->escapeLike($request->input('q')).'%';
             $query->where(function (Builder $q) use ($like) {
-                foreach (['name', 'patient_ID', 'phone_number1', 'phone_number2', 'operation', 'doctor', 'anesthesia', 'financier_number', 'address', 'notes'] as $column) {
+                foreach (['name', 'patient_ID', 'phone_number1', 'phone_number2', 'operation', 'doctor', 'anesthesia', 'financier_number', 'address', 'displacement_address', 'notes'] as $column) {
                     if (! $this->columnAllowed($column)) continue;
                     $q->orWhere('records.'.$column, 'like', $like);
                 }
@@ -502,7 +502,7 @@ class RecordController extends Controller
 
     private function filterableColumns(): array
     {
-        return ['name' => 'list', 'financier_number' => 'list', 'address' => 'list', 'patient_ID' => 'list', 'operation' => 'list', 'doctor' => 'list', 'anesthesia' => 'list', 'user_name' => 'list', 'financier' => 'list', 'phone_number1' => 'list', 'phone_number2' => 'list', 'amount' => 'list', 'doctor_share' => 'list', 'anesthesiologists_share' => 'list', 'bed' => 'list', 'private' => 'list', 'notes' => 'list', 'notes_2' => 'list', 'branch_name' => 'list', 'branch_notes' => 'list', 'management_status' => 'management_status', 'management_notes' => 'list', 'displacement_status' => 'displacement_status', 'income_status' => 'income_status', 'family_burden' => 'family_burden', 'done' => 'boolean', 'distributed' => 'boolean', 'eligible' => 'boolean'];
+        return ['name' => 'list', 'financier_number' => 'list', 'address' => 'list', 'displacement_address' => 'list', 'patient_ID' => 'list', 'operation' => 'list', 'doctor' => 'list', 'anesthesia' => 'list', 'user_name' => 'list', 'financier' => 'list', 'phone_number1' => 'list', 'phone_number2' => 'list', 'amount' => 'list', 'doctor_share' => 'list', 'anesthesiologists_share' => 'list', 'bed' => 'list', 'private' => 'list', 'notes' => 'list', 'notes_2' => 'list', 'branch_name' => 'list', 'branch_notes' => 'list', 'management_status' => 'management_status', 'management_notes' => 'list', 'displacement_status' => 'displacement_status', 'income_status' => 'income_status', 'family_burden' => 'family_burden', 'done' => 'boolean', 'distributed' => 'boolean', 'eligible' => 'boolean'];
     }
 
     private function dataTableMeta(Request $request, int $archived): array
@@ -597,6 +597,7 @@ class RecordController extends Controller
             'displacement_status' => ['nullable', Rule::in(array_keys(Record::DISPLACEMENT_STATUSES))],
             'income_status' => ['nullable', Rule::in(array_keys(Record::INCOME_STATUSES))],
             'family_burden' => ['nullable', Rule::in(array_keys(Record::FAMILY_BURDENS))],
+            'displacement_address' => ['nullable', 'string', 'max:255'],
             'distributed' => ['nullable', 'boolean'],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
         ];
@@ -609,7 +610,7 @@ class RecordController extends Controller
 
     private function normalizeSocialFields(Request $request): void
     {
-        $request->merge(collect(['displacement_status', 'income_status', 'family_burden', 'distributed', 'branch_id'])
+        $request->merge(collect(['displacement_address', 'displacement_status', 'income_status', 'family_burden', 'distributed', 'branch_id'])
             ->mapWithKeys(fn ($field) => [$field => $request->input($field) === '' ? null : $request->input($field)])
             ->all());
     }

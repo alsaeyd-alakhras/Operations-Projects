@@ -60,6 +60,7 @@ class Record extends Model
         'user_name',
         'user_id',
         'address',
+        'displacement_address',
         'displacement_status',
         'income_status',
         'family_burden',
