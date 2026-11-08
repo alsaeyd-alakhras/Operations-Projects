@@ -83,8 +83,8 @@
 <th>@include('dashboard.records._th-filter', ['col' => 'anesthesiologists_share', 'label' => 'حصة التخدير', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'bed', 'label' => 'المبيت', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'private', 'label' => 'خاص', 'type' => 'list'])</th>
-<th>@include('dashboard.records._th-filter', ['col' => 'address', 'label' => 'العنوان', 'type' => 'list'])</th>
-<th>@include('dashboard.records._th-filter', ['col' => 'displacement_address', 'label' => 'عنوان النزوح', 'type' => 'list'])</th>
+<th>@include('dashboard.records._th-filter', ['col' => 'address', 'label' => 'العنوان الحالي', 'type' => 'list'])</th>
+<th>@include('dashboard.records._th-filter', ['col' => 'displacement_address', 'label' => 'العنوان السابق', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'displacement_status', 'label' => 'حالة النزوح والسكن وتضرر البيت', 'type' => 'enum', 'options' => \App\Models\Record::DISPLACEMENT_STATUSES])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'income_status', 'label' => 'مصادر الدخل والوضع المالي', 'type' => 'enum', 'options' => \App\Models\Record::INCOME_STATUSES])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'family_burden', 'label' => 'حجم الأسرة والحالات الخاصة', 'type' => 'enum', 'options' => \App\Models\Record::FAMILY_BURDENS])</th>

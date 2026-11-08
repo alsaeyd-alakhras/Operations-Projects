@@ -29,10 +29,10 @@
                 <x-form.input name="phone_number2" maxlength="10" label="جوال 2"  :disabled="auth()->user()->isBranchUser()" />
             </div>
             <div class="form-group col-md-6">
-                <x-form.input name="address" label="العنوان" :disabled="auth()->user()->isBranchUser()" />
+                <x-form.input name="address" label="العنوان الحالي" :disabled="auth()->user()->isBranchUser()" />
             </div>
             <div class="form-group col-md-6">
-                <x-form.input name="displacement_address" label="عنوان النزوح (إذا كان نازح)" :disabled="auth()->user()->isBranchUser()" />
+                <x-form.input name="displacement_address" label="العنوان السابق (إذا كان نازح)" :disabled="auth()->user()->isBranchUser()" />
             </div>
         </div>
     </section>

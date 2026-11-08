@@ -72,11 +72,11 @@ class RecordsExport implements FromArray, WithHeadings, WithColumnWidths, WithCo
         }
 
         if ($this->data->contains(fn ($item) => array_key_exists('address', $item))) {
-            $cols['address'] = ['العنوان', 28, 'wrap'];
+            $cols['address'] = ['العنوان الحالي', 28, 'wrap'];
         }
 
         if ($this->data->contains(fn ($item) => array_key_exists('displacement_address', $item))) {
-            $cols['displacement_address'] = ['عنوان النزوح', 28, 'wrap'];
+            $cols['displacement_address'] = ['العنوان السابق', 28, 'wrap'];
         }
 
         return $cols + [
