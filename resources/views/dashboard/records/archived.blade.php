@@ -244,7 +244,7 @@
                         { data: 'doctor', name: 'doctor', orderable: false, className: 'text-center'},
                         { data: 'eligible_label', name: 'eligible_label', orderable: false},
                         { data: 'branch_name', name: 'branch_name', orderable: false},
-                        { data: 'branch_notes', name: 'branch_notes', orderable: false},
+                        { data: 'branch_notes', name: 'branch_notes', orderable: false, render: RecordsTable.noteRender},
                         RecordsTable.managementColumn({ canManage: @json(auth()->user()->can('management', 'App\Models\Record')), url: '{{ route("records.management", ":id") }}', csrf: '{{ csrf_token() }}' }),
                         { data: 'amount', name: 'amount', orderable: false, className: 'rec-num', render: function(data, type, row) {
                             return  formatNumber(data,2);

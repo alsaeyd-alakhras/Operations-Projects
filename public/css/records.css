@@ -808,5 +808,7 @@ select.rec-mgmt-select option { background: var(--rec-surface); color: var(--rec
 
 /* خيارات الفلتر: اقتطاع النصوص الطويلة (الملاحظات) بسطر واحد، النص الكامل في الـ tooltip */
 .records-page .rec-filter-options label span { display: inline-block; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
-.records-page .rec-filter-orrow { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; padding: 4px 6px; border-radius: 6px; font-size: 12px; color: var(--rec-muted); cursor: pointer; }
-.records-page .rec-filter-orrow:hover { background: var(--rec-brand-tint); }
+
+/* ملاحظات الفرع في الجدول: عرض ثابت مقتطع، والنص الكامل في نافذة عند المرور */
+.records-page .rec-note-cell { display: block; width: 190px; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default; }
+.rec-note-tip { position: fixed; z-index: 3000; max-width: 360px; padding: 9px 12px; border-radius: 8px; background: #1f2937; color: #fff; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); pointer-events: none; }

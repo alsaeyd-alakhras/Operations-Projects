@@ -407,7 +407,7 @@ class RecordController extends Controller
         if ($request->filled('to_date') && $this->columnAllowed('date')) $query->whereDate('records.date', '<=', $request->input('to_date'));
         if ($request->filled('from_age') && $this->columnAllowed('age')) $query->where('records.age', '>=', (int) $request->input('from_age'));
         if ($request->filled('to_age') && $this->columnAllowed('age')) $query->where('records.age', '<=', (int) $request->input('to_age'));
-        $this->applyColumnFilters($query, $request->input('filters', []));
+        $this->applyColumnFilters($query, $request->input('filters', []), $request->input('match') === 'any');
         $query->whereNotNull($expr)->where($expr, '<>', '');
         if ($request->filled('q')) {
             $query->where($expr, 'like', '%'.$this->escapeLike($request->input('q')).'%');
@@ -455,10 +455,11 @@ class RecordController extends Controller
                 }
             });
         }
-        $this->applyColumnFilters($query, $request->input('filters', []));
+        $this->applyColumnFilters($query, $request->input('filters', []), $request->input('match') === 'any');
     }
 
-    private function applyColumnFilters(Builder $query, mixed $filters): void
+    /** $any = true: شروط الأعمدة تُضم بـ OR (أي فلتر)، وإلا فكلها AND. السنة والبحث والتاريخ والعمر تبقى AND دائمًا. */
+    private function applyColumnFilters(Builder $query, mixed $filters, bool $any = false): void
     {
         if (is_string($filters)) $filters = json_decode($filters, true) ?: [];
         $orGroup = [];
@@ -473,8 +474,6 @@ class RecordController extends Controller
             $empty = filter_var($filter['empty'] ?? false, FILTER_VALIDATE_BOOLEAN);
             // «أي قيمة غير فارغة» (بديل تحديد كل الخيارات) بدون إرسال كل النصوص
             $nonEmpty = $types[$column] === 'list' && filter_var($filter['nonempty'] ?? false, FILTER_VALIDATE_BOOLEAN);
-            // أعمدة معلّمة بـ «أو»: شروطها تُضم بـ OR في مجموعة واحدة وتبقى AND مع باقي الفلاتر
-            $isOr = filter_var($filter['or'] ?? false, FILTER_VALIDATE_BOOLEAN);
             // «يحتوي على» (مثل Excel: نص البحث بدل اختيار القيم واحدة واحدة) — لأعمدة النص فقط
             $contains = $types[$column] === 'list' ? trim((string) ($filter['contains'] ?? '')) : '';
             if ($types[$column] === 'boolean') {
@@ -503,7 +502,7 @@ class RecordController extends Controller
                     });
                 }
             };
-            if ($isOr) $orGroup[] = $condition; else $query->where($condition);
+            if ($any) $orGroup[] = $condition; else $query->where($condition);
         }
         if ($orGroup) {
             $query->where(function (Builder $q) use ($orGroup) {
@@ -576,7 +575,7 @@ class RecordController extends Controller
     private function filtersRequest(Request $request): Request
     {
         $filters = json_decode($request->input('filters'), true) ?: [];
-        return Request::create('/', 'GET', array_merge($request->only(['year', 'q', 'from_date', 'to_date', 'from_age', 'to_age']), ['filters' => $filters]));
+        return Request::create('/', 'GET', array_merge($request->only(['year', 'q', 'match', 'from_date', 'to_date', 'from_age', 'to_age']), ['filters' => $filters]));
     }
 
     /** حقول موافقة الإدارة تُقبل فقط من مستخدم يملك صلاحية records.management، وإلا تُتجاهل. */

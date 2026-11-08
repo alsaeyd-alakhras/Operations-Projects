@@ -11,7 +11,7 @@
         init: function (config) {
             var selectors = config.selectors || {};
             var $table = $(selectors.table || '#records-table');
-            var state = { year: 'all', q: '', filters: {}, from_date: '', to_date: '', from_age: '', to_age: '' };
+            var state = { year: 'all', q: '', filters: {}, match: 'any', from_date: '', to_date: '', from_age: '', to_age: '' };
             var jumpToLast = true;
             var requests = {};
             var timers = {};
@@ -49,7 +49,7 @@
             // بدون ذلك يبقى start القديم (مثلاً 2500) فيرجع السيرفر صفحة فاضية رغم أن النتيجة سجل واحد.
             function reloadLast() { jumpToLast = true; table.ajax.reload(null, true); }
             function reset() {
-                state = { year: 'all', q: '', filters: {}, from_date: '', to_date: '', from_age: '', to_age: '' };
+                state = { year: 'all', q: '', filters: {}, match: 'any', from_date: '', to_date: '', from_age: '', to_age: '' };
                 $('#records-year').val('all'); $('#records-q').val('');
                 $('.filterDropdownMenu').each(function () { resetMenu($(this)); });
                 updateIndicators(); reloadLast();
@@ -72,13 +72,12 @@
             }
             function loadOptions($menu, query) {
                 var col = String($menu.data('col'));
-                var filters = $.extend({}, state.filters);
-                delete filters[col];
+                var filters = {}; // قائمة كل عمود تعرض كل قيمه (ضمن السنة والبحث العام) ولا تتأثر بفلاتر الأعمدة الأخرى
                 if (requests[col]) requests[col].abort();
                 var token = Date.now(); $menu.data('rec-token', token);
                 requests[col] = $.getJSON(config.urls.filterOptions, {
                     column: col, archived: config.archived, year: state.year, q: query,
-                    filters: JSON.stringify(filters), from_date: state.from_date, to_date: state.to_date,
+                    filters: JSON.stringify(filters), match: state.match, from_date: state.from_date, to_date: state.to_date,
                     from_age: state.from_age, to_age: state.to_age
                 })
                     .done(function (json) {
@@ -98,7 +97,7 @@
                 },
                 language: $.extend({ emptyTable: 'لا توجد سجلات مطابقة', zeroRecords: 'لا توجد سجلات مطابقة' }, { url: config.languageUrl }),
                 ajax: { url: config.urls.index, data: function (data) {
-                    data.year = state.year; data.q = state.q; data.filters = JSON.stringify(state.filters);
+                    data.year = state.year; data.q = state.q; data.filters = JSON.stringify(state.filters); data.match = state.match;
                     data.from_date = state.from_date; data.to_date = state.to_date; data.from_age = state.from_age; data.to_age = state.to_age;
                 } },
                 columns: config.columns
@@ -215,7 +214,6 @@
                     // إعادة عرض البحث المحفوظ («يحتوي على») عند فتح القائمة من جديد
                     if (saved.contains && !$menu.find('.rec-filter-search').val()) $menu.find('.rec-filter-search').val(saved.contains);
                     $menu.find('.rec-filter-all').prop('checked', !!saved.contains || !!saved.nonempty);
-                    $menu.find('.rec-filter-or').prop('checked', !!saved.or);
                     syncAllLabel($menu);
                     if ($menu.data('static')) filterStatic($menu);
                     else loadOptions($menu, $menu.find('.rec-filter-search').val() || '');
@@ -247,8 +245,7 @@
                         if (!$menu.data('static') && search && (allChecked || !values.length)) { contains = search; values = []; }
                         // «الكل» بدون بحث (أو كل القيم محددة) = أي قيمة غير فارغة: لا نرسل آلاف النصوص الطويلة للسيرفر (كانت تعلّق الفلترة)
                         else if (!$menu.data('static') && !search && values.length && (allChecked || (!$menu.data('rec-truncated') && values.length >= $menu.data('rec-total')))) { nonempty = true; values = []; }
-                        var or = $menu.find('.rec-filter-or').prop('checked') === true;
-                        if (values.length || empty || contains || nonempty) state.filters[col] = { values: values, empty: empty, contains: contains, nonempty: nonempty, or: or }; else delete state.filters[col];
+                        if (values.length || empty || contains || nonempty) state.filters[col] = { values: values, empty: empty, contains: contains, nonempty: nonempty }; else delete state.filters[col];
                     }
                     updateIndicators(); reloadLast(); close($menu);
                 })
@@ -265,9 +262,10 @@
                 .on('click.recfilter', '#excel-export, #print-report', function (event) {
                     event.preventDefault();
                     var isExcel = this.id === 'excel-export', $form = isExcel ? $('#exportExcelForm') : $('#printReport form');
-                    $form.find('input[name="data"], input[name="filters"], input[name="archived"], input[name="year"], input[name="q"], input[name="from_date"], input[name="to_date"], input[name="from_age"], input[name="to_age"]').remove();
+                    $form.find('input[name="data"], input[name="filters"], input[name="archived"], input[name="match"], input[name="year"], input[name="q"], input[name="from_date"], input[name="to_date"], input[name="from_age"], input[name="to_age"]').remove();
                     $('<input>', { type: 'hidden', name: 'filters', value: JSON.stringify(state.filters) }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'archived', value: config.archived }).appendTo($form);
+                    $('<input>', { type: 'hidden', name: 'match', value: state.match }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'year', value: state.year }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'q', value: state.q }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'from_date', value: state.from_date }).appendTo($form);
@@ -283,6 +281,26 @@
     };
     // ===== إشعار صغير =====
     function esc(text) { return $('<div>').text(text === null || text === undefined ? '' : text).html(); }
+    // ===== خلية ملاحظات طويلة: مقتطعة بعرض ثابت، والنص الكامل في نافذة صغيرة عند المرور =====
+    RecordsTable.noteRender = function (data, type) {
+        if (type !== 'display' || data === null || data === undefined || data === '') return data || '';
+        return '<span class="rec-note-cell" data-full="' + esc(data).replace(/"/g, '&quot;') + '">' + esc(data) + '</span>';
+    };
+    (function () {
+        var $tip = null;
+        function hide() { if ($tip) { $tip.remove(); $tip = null; } }
+        $(document).on('mouseenter', '.rec-note-cell', function () {
+            hide();
+            var el = this, full = el.getAttribute('data-full');
+            if (!full || el.scrollWidth <= el.clientWidth) return;
+            $tip = $('<div class="rec-note-tip" role="tooltip"></div>').text(full).appendTo('body');
+            var r = el.getBoundingClientRect(), w = $tip.outerWidth(), h = $tip.outerHeight();
+            var left = r.left - w - 8; if (left < 8) left = Math.min(r.right + 8, window.innerWidth - w - 8);
+            var top = Math.max(8, Math.min(r.top + r.height / 2 - h / 2, window.innerHeight - h - 8));
+            $tip.css({ left: left, top: top });
+        }).on('mouseleave', '.rec-note-cell', hide).on('scroll', hide);
+        $(window).on('scroll', hide);
+    }());
     RecordsTable.toast = function (message, type) {
         var $box = $('#rec-toasts');
         if (!$box.length) $box = $('<div id="rec-toasts" class="rec-toasts" role="status" aria-live="polite"></div>').appendTo('body');
