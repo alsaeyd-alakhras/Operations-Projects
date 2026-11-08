@@ -18,7 +18,7 @@
 
             function active(col) {
                 var filter = state.filters[col];
-                return !!(filter && ((filter.values && filter.values.length) || filter.empty || filter.contains));
+                return !!(filter && ((filter.values && filter.values.length) || filter.empty || filter.contains || filter.nonempty));
             }
             // تفريغ قائمة فلتر بدون المساس بقيم الـ checkboxes (الخيارات الثابتة تعتمد على value)
             function resetMenu($menu) {
@@ -54,16 +54,20 @@
                 $('.filterDropdownMenu').each(function () { resetMenu($(this)); });
                 updateIndicators(); reloadLast();
             }
-            function listOptions($menu, values, selected, truncated) {
-                var $options = $menu.find('.rec-filter-options').empty();
-                var seen = {};
+            function attr(text) { return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+            // بناء القائمة كنص HTML واحد (بدل آلاف عناصر jQuery) + اقتطاع النصوص الطويلة (الملاحظات) بالعرض فقط، القيمة الكاملة تبقى في value
+            function listOptions($menu, values, selected, truncated, selectAll) {
+                var seen = {}, html = [], count = 0, chosen = {};
+                selected.forEach(function (value) { chosen[value] = true; });
                 selected.concat(values).forEach(function (value) {
                     value = String(value);
                     if (seen[value]) return;
-                    seen[value] = true;
-                    $('<label>').append($('<input>', { type: 'checkbox', value: value, checked: selected.indexOf(value) !== -1 }))
-                        .append(document.createTextNode(' ' + value)).appendTo($options);
+                    seen[value] = true; count++;
+                    var shown = value.length > 120 ? value.substring(0, 120) + '…' : value;
+                    html.push('<label title="' + attr(value.length > 120 ? value.substring(0, 600) : value) + '"><input type="checkbox" value="' + attr(value) + '"' + (selectAll || chosen[value] ? ' checked' : '') + '> <span>' + attr(shown) + '</span></label>');
                 });
+                $menu.find('.rec-filter-options').html(html.join(''));
+                $menu.data('rec-total', count).data('rec-truncated', !!truncated);
                 $menu.find('.rec-filter-note').text(truncated ? 'تم عرض أول 5000 نتيجة' : '');
             }
             function loadOptions($menu, query) {
@@ -79,7 +83,8 @@
                 })
                     .done(function (json) {
                         if ($menu.data('rec-token') !== token) return;
-                        listOptions($menu, (json && json.values) || [], ((state.filters[col] || {}).values || []).map(String), json && json.truncated);
+                        var saved = state.filters[col] || {};
+                        listOptions($menu, (json && json.values) || [], (saved.values || []).map(String), json && json.truncated, !!saved.nonempty && !$.trim(query));
                     });
             }
 
@@ -209,7 +214,8 @@
                     var saved = state.filters[String($menu.data('col'))] || {};
                     // إعادة عرض البحث المحفوظ («يحتوي على») عند فتح القائمة من جديد
                     if (saved.contains && !$menu.find('.rec-filter-search').val()) $menu.find('.rec-filter-search').val(saved.contains);
-                    $menu.find('.rec-filter-all').prop('checked', !!saved.contains);
+                    $menu.find('.rec-filter-all').prop('checked', !!saved.contains || !!saved.nonempty);
+                    $menu.find('.rec-filter-or').prop('checked', !!saved.or);
                     syncAllLabel($menu);
                     if ($menu.data('static')) filterStatic($menu);
                     else loadOptions($menu, $menu.find('.rec-filter-search').val() || '');
@@ -237,8 +243,12 @@
                         var empty = $menu.find('.rec-filter-empty').prop('checked') === true;
                         var search = $.trim($menu.find('.rec-filter-search').val()), contains = '';
                         // مثل Excel: نص بحث + «كل نتائج البحث» (أو بدون تحديد) = تصفية «يحتوي على» على كل المطابقات
-                        if (!$menu.data('static') && search && ($menu.find('.rec-filter-all').prop('checked') || !values.length)) { contains = search; values = []; }
-                        if (values.length || empty || contains) state.filters[col] = { values: values, empty: empty, contains: contains }; else delete state.filters[col];
+                        var nonempty = false, allChecked = $menu.find('.rec-filter-all').prop('checked') === true;
+                        if (!$menu.data('static') && search && (allChecked || !values.length)) { contains = search; values = []; }
+                        // «الكل» بدون بحث (أو كل القيم محددة) = أي قيمة غير فارغة: لا نرسل آلاف النصوص الطويلة للسيرفر (كانت تعلّق الفلترة)
+                        else if (!$menu.data('static') && !search && values.length && (allChecked || (!$menu.data('rec-truncated') && values.length >= $menu.data('rec-total')))) { nonempty = true; values = []; }
+                        var or = $menu.find('.rec-filter-or').prop('checked') === true;
+                        if (values.length || empty || contains || nonempty) state.filters[col] = { values: values, empty: empty, contains: contains, nonempty: nonempty, or: or }; else delete state.filters[col];
                     }
                     updateIndicators(); reloadLast(); close($menu);
                 })

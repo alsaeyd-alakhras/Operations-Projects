@@ -805,3 +805,8 @@ select.rec-mgmt-select option { background: var(--rec-surface); color: var(--rec
     .navbar .navbar-brand h1 { font-size: 1.35rem; }
     .navbar .navbar-brand { margin-inline-end: 12px !important; }
 }
+
+/* خيارات الفلتر: اقتطاع النصوص الطويلة (الملاحظات) بسطر واحد، النص الكامل في الـ tooltip */
+.records-page .rec-filter-options label span { display: inline-block; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.records-page .rec-filter-orrow { display: flex; align-items: center; gap: 6px; margin: 6px 0 0; padding: 4px 6px; border-radius: 6px; font-size: 12px; color: var(--rec-muted); cursor: pointer; }
+.records-page .rec-filter-orrow:hover { background: var(--rec-brand-tint); }

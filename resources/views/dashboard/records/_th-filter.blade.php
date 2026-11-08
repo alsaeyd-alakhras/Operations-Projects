@@ -23,6 +23,7 @@
                         </div>
                     </div>
                     <small class="rec-filter-note"></small>
+                    <label class="rec-filter-orrow" title="نتائج هذا العمود تُضم إلى نتائج الأعمدة الأخرى المعلّمة بـ «أو» بدل أن يجب تحقق الاثنين معًا"><input type="checkbox" class="rec-filter-or"> <span>أو مع الأعمدة الأخرى المعلّمة «أو»</span></label>
                     <div class="rec-filter-foot">
                         @if ($emptyOption)<label><input type="checkbox" class="rec-filter-empty"> فارغ</label>@else<span></span>@endif
                         <button type="button" class="rec-filter-clear">مسح</button>

@@ -461,6 +461,7 @@ class RecordController extends Controller
     private function applyColumnFilters(Builder $query, mixed $filters): void
     {
         if (is_string($filters)) $filters = json_decode($filters, true) ?: [];
+        $orGroup = [];
         foreach ((array) $filters as $column => $value) {
             $types = $this->filterableColumns();
             if (! isset($types[$column]) || ! $this->columnAllowed($column)) continue;
@@ -469,7 +470,11 @@ class RecordController extends Controller
             // Enum/boolean UI filters use a scalar `value`; list filters use `values`.
             $values = $filter['values'] ?? (array_key_exists('value', $filter) ? [$filter['value']] : $filter);
             $values = array_values(array_filter((array) $values, fn ($item) => $item !== '' && $item !== null));
-            $empty = ($filter['empty'] ?? false) === true;
+            $empty = filter_var($filter['empty'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            // «أي قيمة غير فارغة» (بديل تحديد كل الخيارات) بدون إرسال كل النصوص
+            $nonEmpty = $types[$column] === 'list' && filter_var($filter['nonempty'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            // أعمدة معلّمة بـ «أو»: شروطها تُضم بـ OR في مجموعة واحدة وتبقى AND مع باقي الفلاتر
+            $isOr = filter_var($filter['or'] ?? false, FILTER_VALIDATE_BOOLEAN);
             // «يحتوي على» (مثل Excel: نص البحث بدل اختيار القيم واحدة واحدة) — لأعمدة النص فقط
             $contains = $types[$column] === 'list' ? trim((string) ($filter['contains'] ?? '')) : '';
             if ($types[$column] === 'boolean') {
@@ -483,10 +488,11 @@ class RecordController extends Controller
             } elseif ($types[$column] === 'family_burden') {
                 $values = array_values(array_intersect($values, array_keys(Record::FAMILY_BURDENS)));
             }
-            if (! $values && $contains === '' && ! $empty) continue;
+            if (! $values && $contains === '' && ! $empty && ! $nonEmpty) continue;
             // القيم المحددة أو «يحتوي على» أو «فارغ» تُدمج بـ OR داخل العمود الواحد، وبين الأعمدة AND
             $isBoolean = $types[$column] === 'boolean';
-            $query->where(function (Builder $q) use ($qualified, $values, $contains, $empty, $isBoolean) {
+            $condition = function (Builder $q) use ($qualified, $values, $contains, $empty, $isBoolean, $nonEmpty) {
+                if ($nonEmpty) $q->orWhere(fn (Builder $e) => $e->whereNotNull($qualified)->where($qualified, '<>', ''));
                 if ($values) $q->orWhereIn($qualified, $values);
                 if ($contains !== '') $q->orWhere($qualified, 'like', '%'.$this->escapeLike($contains).'%');
                 if ($empty) {
@@ -496,6 +502,12 @@ class RecordController extends Controller
                         if (! $isBoolean) $e->orWhere($qualified, '');
                     });
                 }
+            };
+            if ($isOr) $orGroup[] = $condition; else $query->where($condition);
+        }
+        if ($orGroup) {
+            $query->where(function (Builder $q) use ($orGroup) {
+                foreach ($orGroup as $condition) $q->orWhere($condition);
             });
         }
     }
