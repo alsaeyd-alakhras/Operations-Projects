@@ -250,15 +250,14 @@ class KuwaitiCaseController extends Controller
                 }
             });
         }
-        $this->applyColumnFilters($query, $request->input('filters', []), $request->input('match') === 'any');
+        $this->applyColumnFilters($query, $request->input('filters', []));
     }
 
-    /** $any = true: شروط الأعمدة تُضم بـ OR، وإلا فكلها AND. السنة والبحث والتاريخ والنقاط تبقى AND دائمًا. */
-    private function applyColumnFilters(Builder $query, mixed $filters, bool $any = false): void
+    /** مثل Excel: القيم المختارة داخل العمود الواحد تُضم بـ OR، وبين الأعمدة المختلفة كلها AND. */
+    private function applyColumnFilters(Builder $query, mixed $filters): void
     {
         if (is_string($filters)) $filters = json_decode($filters, true) ?: [];
         $types = $this->filterableColumns();
-        $orGroup = [];
         foreach ((array) $filters as $column => $value) {
             if (! isset($types[$column])) continue;
             $qualified = $this->columnExpression($column);
@@ -286,12 +285,7 @@ class KuwaitiCaseController extends Controller
                     });
                 }
             };
-            if ($any) $orGroup[] = $condition; else $query->where($condition);
-        }
-        if ($orGroup) {
-            $query->where(function (Builder $q) use ($orGroup) {
-                foreach ($orGroup as $condition) $q->orWhere($condition);
-            });
+            $query->where($condition);
         }
     }
 
@@ -351,7 +345,7 @@ class KuwaitiCaseController extends Controller
     {
         $filters = json_decode((string) $request->input('filters'), true) ?: [];
 
-        return Request::create('/', 'GET', array_merge($request->only(['year', 'q', 'match', 'from_date', 'to_date', 'from_score', 'to_score']), ['filters' => $filters]));
+        return Request::create('/', 'GET', array_merge($request->only(['year', 'q', 'from_date', 'to_date', 'from_score', 'to_score']), ['filters' => $filters]));
     }
 
     private function escapeLike(string $value): string

@@ -14,7 +14,7 @@
             var range = $.extend({ from: 'from_age', to: 'to_age' }, config.range || {});
             var totalKeys = config.totals || ['amount', 'doctor_share', 'anesthesiologists_share', 'bed', 'private'];
             function newState() {
-                var s = { year: 'all', q: '', filters: {}, match: 'any', from_date: '', to_date: '' };
+                var s = { year: 'all', q: '', filters: {}, from_date: '', to_date: '' };
                 s[range.from] = ''; s[range.to] = '';
                 return s;
             }
@@ -79,12 +79,12 @@
             }
             function loadOptions($menu, query) {
                 var col = String($menu.data('col'));
-                var filters = {}; // قائمة كل عمود تعرض كل قيمه (ضمن السنة والبحث العام) ولا تتأثر بفلاتر الأعمدة الأخرى
+                var filters = $.extend({}, state.filters); delete filters[col]; // مثل Excel: قائمة قيم العمود تضيق حسب فلاتر الأعمدة الأخرى (وليس فلتر العمود نفسه)
                 if (requests[col]) requests[col].abort();
                 var token = Date.now(); $menu.data('rec-token', token);
                 var params = {
                     column: col, archived: config.archived, year: state.year, q: query,
-                    filters: JSON.stringify(filters), match: state.match, from_date: state.from_date, to_date: state.to_date
+                    filters: JSON.stringify(filters), from_date: state.from_date, to_date: state.to_date
                 };
                 params[range.from] = state[range.from]; params[range.to] = state[range.to];
                 requests[col] = $.getJSON(config.urls.filterOptions, params)
@@ -105,7 +105,7 @@
                 },
                 language: $.extend({ emptyTable: 'لا توجد سجلات مطابقة', zeroRecords: 'لا توجد سجلات مطابقة' }, { url: config.languageUrl }),
                 ajax: { url: config.urls.index, data: function (data) {
-                    data.year = state.year; data.q = state.q; data.filters = JSON.stringify(state.filters); data.match = state.match;
+                    data.year = state.year; data.q = state.q; data.filters = JSON.stringify(state.filters);
                     data.from_date = state.from_date; data.to_date = state.to_date; data[range.from] = state[range.from]; data[range.to] = state[range.to];
                 } },
                 columns: config.columns
@@ -270,10 +270,9 @@
                 .on('click.recfilter', '#excel-export, #print-report', function (event) {
                     event.preventDefault();
                     var isExcel = this.id === 'excel-export', $form = isExcel ? $('#exportExcelForm') : $('#printReport form');
-                    $form.find('input[name="data"], input[name="filters"], input[name="archived"], input[name="match"], input[name="year"], input[name="q"], input[name="from_date"], input[name="to_date"], input[name="' + range.from + '"], input[name="' + range.to + '"]').remove();
+                    $form.find('input[name="data"], input[name="filters"], input[name="archived"], input[name="year"], input[name="q"], input[name="from_date"], input[name="to_date"], input[name="' + range.from + '"], input[name="' + range.to + '"]').remove();
                     $('<input>', { type: 'hidden', name: 'filters', value: JSON.stringify(state.filters) }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'archived', value: config.archived }).appendTo($form);
-                    $('<input>', { type: 'hidden', name: 'match', value: state.match }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'year', value: state.year }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'q', value: state.q }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'from_date', value: state.from_date }).appendTo($form);

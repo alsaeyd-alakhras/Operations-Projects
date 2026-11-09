@@ -407,7 +407,7 @@ class RecordController extends Controller
         if ($request->filled('to_date') && $this->columnAllowed('date')) $query->whereDate('records.date', '<=', $request->input('to_date'));
         if ($request->filled('from_age') && $this->columnAllowed('age')) $query->where('records.age', '>=', (int) $request->input('from_age'));
         if ($request->filled('to_age') && $this->columnAllowed('age')) $query->where('records.age', '<=', (int) $request->input('to_age'));
-        $this->applyColumnFilters($query, $request->input('filters', []), $request->input('match') === 'any');
+        $this->applyColumnFilters($query, $request->input('filters', []));
         $query->whereNotNull($expr)->where($expr, '<>', '');
         if ($request->filled('q')) {
             $query->where($expr, 'like', '%'.$this->escapeLike($request->input('q')).'%');
@@ -455,14 +455,13 @@ class RecordController extends Controller
                 }
             });
         }
-        $this->applyColumnFilters($query, $request->input('filters', []), $request->input('match') === 'any');
+        $this->applyColumnFilters($query, $request->input('filters', []));
     }
 
-    /** $any = true: شروط الأعمدة تُضم بـ OR (أي فلتر)، وإلا فكلها AND. السنة والبحث والتاريخ والعمر تبقى AND دائمًا. */
-    private function applyColumnFilters(Builder $query, mixed $filters, bool $any = false): void
+    /** مثل Excel: القيم المختارة داخل العمود الواحد تُضم بـ OR، وبين الأعمدة المختلفة كلها AND. */
+    private function applyColumnFilters(Builder $query, mixed $filters): void
     {
         if (is_string($filters)) $filters = json_decode($filters, true) ?: [];
-        $orGroup = [];
         foreach ((array) $filters as $column => $value) {
             $types = $this->filterableColumns();
             if (! isset($types[$column]) || ! $this->columnAllowed($column)) continue;
@@ -502,12 +501,7 @@ class RecordController extends Controller
                     });
                 }
             };
-            if ($any) $orGroup[] = $condition; else $query->where($condition);
-        }
-        if ($orGroup) {
-            $query->where(function (Builder $q) use ($orGroup) {
-                foreach ($orGroup as $condition) $q->orWhere($condition);
-            });
+            $query->where($condition);
         }
     }
 
@@ -575,7 +569,7 @@ class RecordController extends Controller
     private function filtersRequest(Request $request): Request
     {
         $filters = json_decode($request->input('filters'), true) ?: [];
-        return Request::create('/', 'GET', array_merge($request->only(['year', 'q', 'match', 'from_date', 'to_date', 'from_age', 'to_age']), ['filters' => $filters]));
+        return Request::create('/', 'GET', array_merge($request->only(['year', 'q', 'from_date', 'to_date', 'from_age', 'to_age']), ['filters' => $filters]));
     }
 
     /** حقول موافقة الإدارة تُقبل فقط من مستخدم يملك صلاحية records.management، وإلا تُتجاهل. */
