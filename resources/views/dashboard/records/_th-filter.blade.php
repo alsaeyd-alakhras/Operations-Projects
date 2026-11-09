@@ -4,6 +4,7 @@
     $isList = in_array($type, ['list', 'enum', 'bool'], true);
     $static = in_array($type, ['enum', 'bool'], true);
     $emptyOption = $emptyOption ?? ($col !== 'done');
+    $rangeKey = $rangeKey ?? 'age';
     $staticOptions = $type === 'bool' ? ['1' => 'نعم', '0' => 'لا'] : ($options ?? []);
 @endphp
 <div class="d-flex align-items-center justify-content-between">
@@ -32,8 +33,8 @@
                     <label>إلى <input type="date" class="form-control rec-filter-to" id="to_date"></label>
                     <div class="rec-filter-foot"><button type="button" class="rec-filter-apply" aria-label="تطبيق"><i class="fe fe-check"></i></button><button type="button" class="rec-filter-clear">مسح</button></div>
                 @elseif ($type === 'range')
-                    <label>من <input type="number" class="form-control rec-filter-from" id="from_age" min="0"></label>
-                    <label>إلى <input type="number" class="form-control rec-filter-to" id="to_age" min="0"></label>
+                    <label>من <input type="number" class="form-control rec-filter-from" id="from_{{ $rangeKey }}" min="0"></label>
+                    <label>إلى <input type="number" class="form-control rec-filter-to" id="to_{{ $rangeKey }}" min="0"></label>
                     <div class="rec-filter-foot"><button type="button" class="rec-filter-apply" aria-label="تطبيق"><i class="fe fe-check"></i></button><button type="button" class="rec-filter-clear">مسح</button></div>
                 @endif
             </div>

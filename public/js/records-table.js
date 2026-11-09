@@ -11,7 +11,14 @@
         init: function (config) {
             var selectors = config.selectors || {};
             var $table = $(selectors.table || '#records-table');
-            var state = { year: 'all', q: '', filters: {}, match: 'any', from_date: '', to_date: '', from_age: '', to_age: '' };
+            var range = $.extend({ from: 'from_age', to: 'to_age' }, config.range || {});
+            var totalKeys = config.totals || ['amount', 'doctor_share', 'anesthesiologists_share', 'bed', 'private'];
+            function newState() {
+                var s = { year: 'all', q: '', filters: {}, match: 'any', from_date: '', to_date: '' };
+                s[range.from] = ''; s[range.to] = '';
+                return s;
+            }
+            var state = newState();
             var jumpToLast = true;
             var requests = {};
             var timers = {};
@@ -49,7 +56,7 @@
             // بدون ذلك يبقى start القديم (مثلاً 2500) فيرجع السيرفر صفحة فاضية رغم أن النتيجة سجل واحد.
             function reloadLast() { jumpToLast = true; table.ajax.reload(null, true); }
             function reset() {
-                state = { year: 'all', q: '', filters: {}, match: 'any', from_date: '', to_date: '', from_age: '', to_age: '' };
+                state = newState();
                 $('#records-year').val('all'); $('#records-q').val('');
                 $('.filterDropdownMenu').each(function () { resetMenu($(this)); });
                 updateIndicators(); reloadLast();
@@ -75,11 +82,12 @@
                 var filters = {}; // قائمة كل عمود تعرض كل قيمه (ضمن السنة والبحث العام) ولا تتأثر بفلاتر الأعمدة الأخرى
                 if (requests[col]) requests[col].abort();
                 var token = Date.now(); $menu.data('rec-token', token);
-                requests[col] = $.getJSON(config.urls.filterOptions, {
+                var params = {
                     column: col, archived: config.archived, year: state.year, q: query,
-                    filters: JSON.stringify(filters), match: state.match, from_date: state.from_date, to_date: state.to_date,
-                    from_age: state.from_age, to_age: state.to_age
-                })
+                    filters: JSON.stringify(filters), match: state.match, from_date: state.from_date, to_date: state.to_date
+                };
+                params[range.from] = state[range.from]; params[range.to] = state[range.to];
+                requests[col] = $.getJSON(config.urls.filterOptions, params)
                     .done(function (json) {
                         if ($menu.data('rec-token') !== token) return;
                         var saved = state.filters[col] || {};
@@ -98,7 +106,7 @@
                 language: $.extend({ emptyTable: 'لا توجد سجلات مطابقة', zeroRecords: 'لا توجد سجلات مطابقة' }, { url: config.languageUrl }),
                 ajax: { url: config.urls.index, data: function (data) {
                     data.year = state.year; data.q = state.q; data.filters = JSON.stringify(state.filters); data.match = state.match;
-                    data.from_date = state.from_date; data.to_date = state.to_date; data.from_age = state.from_age; data.to_age = state.to_age;
+                    data.from_date = state.from_date; data.to_date = state.to_date; data[range.from] = state[range.from]; data[range.to] = state[range.to];
                 } },
                 columns: config.columns
             });
@@ -116,7 +124,7 @@
             $table.on('init.dt draw.dt', placeMeta);
             // ===== إعدادات الأعمدة (إظهار/إخفاء) =====
             var storageKey = config.storageKey || ('rec-cols:' + (config.userId || 0) + ':' + (config.archived ? 'archived' : 'index'));
-            var lockedCols = ['actions', 'name'];
+            var lockedCols = config.lockedColumns || ['actions', 'name'];
             var financialCols = config.financialColumns || [];
             var allowedCols = $.isArray(config.allowedColumns) ? config.allowedColumns : null;
             var colNames = config.columns.map(function (c) { return c.name; });
@@ -189,7 +197,7 @@
                 if (!json) return;
                 $('#count_records').text(json.count === undefined ? '' : json.count);
                 $('#nav_count b').text(Number(json.recordsFiltered || 0).toLocaleString('en-US'));
-                ['amount', 'doctor_share', 'anesthesiologists_share', 'bed', 'private'].forEach(function (key) {
+                totalKeys.forEach(function (key) {
                     if (json.totals && json.totals[key] !== undefined) $('#total_' + key).text(number(json.totals[key]));
                 });
             });
@@ -234,8 +242,8 @@
                 .on('click.recfilter', '.rec-filter-apply', function () {
                     var $menu = $(this).closest('.filterDropdownMenu'), col = String($menu.data('col')), type = $menu.data('type');
                     if (type === 'date' || type === 'range') {
-                        state[type === 'date' ? 'from_date' : 'from_age'] = $menu.find('.rec-filter-from').val() || '';
-                        state[type === 'date' ? 'to_date' : 'to_age'] = $menu.find('.rec-filter-to').val() || '';
+                        state[type === 'date' ? 'from_date' : range.from] = $menu.find('.rec-filter-from').val() || '';
+                        state[type === 'date' ? 'to_date' : range.to] = $menu.find('.rec-filter-to').val() || '';
                     } else if (type === 'list') {
                         var values = $menu.find('.rec-filter-options input:checked').map(function () { return this.value; }).get();
                         var empty = $menu.find('.rec-filter-empty').prop('checked') === true;
@@ -251,7 +259,7 @@
                 })
                 .on('click.recfilter', '.rec-filter-clear', function () {
                     var $menu = $(this).closest('.filterDropdownMenu'), col = String($menu.data('col')), type = $menu.data('type');
-                    if (type === 'date' || type === 'range') { state[type === 'date' ? 'from_date' : 'from_age'] = ''; state[type === 'date' ? 'to_date' : 'to_age'] = ''; }
+                    if (type === 'date' || type === 'range') { state[type === 'date' ? 'from_date' : range.from] = ''; state[type === 'date' ? 'to_date' : range.to] = ''; }
                     else delete state.filters[col];
                     resetMenu($menu); updateIndicators(); reloadLast(); close($menu);
                 })
@@ -262,7 +270,7 @@
                 .on('click.recfilter', '#excel-export, #print-report', function (event) {
                     event.preventDefault();
                     var isExcel = this.id === 'excel-export', $form = isExcel ? $('#exportExcelForm') : $('#printReport form');
-                    $form.find('input[name="data"], input[name="filters"], input[name="archived"], input[name="match"], input[name="year"], input[name="q"], input[name="from_date"], input[name="to_date"], input[name="from_age"], input[name="to_age"]').remove();
+                    $form.find('input[name="data"], input[name="filters"], input[name="archived"], input[name="match"], input[name="year"], input[name="q"], input[name="from_date"], input[name="to_date"], input[name="' + range.from + '"], input[name="' + range.to + '"]').remove();
                     $('<input>', { type: 'hidden', name: 'filters', value: JSON.stringify(state.filters) }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'archived', value: config.archived }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'match', value: state.match }).appendTo($form);
@@ -270,8 +278,8 @@
                     $('<input>', { type: 'hidden', name: 'q', value: state.q }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'from_date', value: state.from_date }).appendTo($form);
                     $('<input>', { type: 'hidden', name: 'to_date', value: state.to_date }).appendTo($form);
-                    $('<input>', { type: 'hidden', name: 'from_age', value: state.from_age }).appendTo($form);
-                    $('<input>', { type: 'hidden', name: 'to_age', value: state.to_age }).appendTo($form);
+                    $('<input>', { type: 'hidden', name: range.from, value: state[range.from] }).appendTo($form);
+                    $('<input>', { type: 'hidden', name: range.to, value: state[range.to] }).appendTo($form);
                     if (isExcel) $form.trigger('submit'); else $('#printReport').modal('show');
                 });
             updateIndicators();

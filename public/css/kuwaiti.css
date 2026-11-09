@@ -1,0 +1,49 @@
+/* Kuwaiti center cases: score badge, evaluation option cards, live total. Relies on the --rec-* tokens of records.css. */
+
+/* ===== score badge in the table ===== */
+.kw-score {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 42px; padding: 2px 10px; border-radius: 999px;
+    font-weight: 700; font-size: 13px; line-height: 1.6; font-variant-numeric: tabular-nums;
+}
+.kw-score--high { background: var(--rec-brand); color: #fff; }
+.kw-score--mid  { background: rgba(217, 140, 20, .16); color: #9a5b00; }
+.kw-score--low  { background: var(--rec-no-bg); color: var(--rec-no); }
+html.rec-dark .kw-score--mid { color: #f2b950; background: rgba(242, 185, 80, .16); }
+
+/* ===== archive/active toggle in the toolbar ===== */
+.kw-switch { text-decoration: none !important; }
+
+/* ===== evaluation (4 radio-card groups) ===== */
+.kw-eval { display: grid; gap: 14px; }
+.kw-group { border: 1px solid var(--rec-line); border-radius: var(--rec-radius); padding: 12px; background: var(--rec-surface-2); }
+.kw-group__title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--rec-text); }
+.kw-group__title small { color: var(--rec-muted); font-weight: 500; }
+.kw-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.kw-card { position: relative; margin: 0; cursor: pointer; }
+.kw-card input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.kw-card__body {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 100%;
+    padding: 9px 12px; border: 1.5px solid var(--rec-line); border-radius: 10px;
+    background: var(--rec-surface); color: var(--rec-text); font-size: 13px; line-height: 1.5;
+    transition: border-color .15s var(--rec-ease), background-color .15s var(--rec-ease), box-shadow .15s var(--rec-ease);
+}
+.kw-card:hover .kw-card__body { border-color: var(--rec-brand); }
+.kw-card input:focus-visible + .kw-card__body { box-shadow: 0 0 0 3px var(--rec-ring); }
+.kw-card input:checked + .kw-card__body { border-color: var(--rec-brand); background: var(--rec-brand-tint); box-shadow: 0 0 0 1px var(--rec-brand) inset; }
+.kw-card input:disabled + .kw-card__body { opacity: .6; cursor: not-allowed; }
+.kw-card__pts { flex: none; min-width: 34px; text-align: center; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--rec-no-bg); color: var(--rec-no); }
+.kw-card input:checked + .kw-card__body .kw-card__pts { background: var(--rec-brand); color: #fff; }
+
+/* ===== live total ===== */
+.kw-total {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 16px; border-radius: var(--rec-radius);
+    background: var(--rec-brand-tint); border: 1px solid var(--rec-ring); color: var(--rec-text);
+}
+.kw-total__label { font-weight: 700; }
+.kw-total__value { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--rec-brand-strong); }
+.kw-total__max { font-size: 13px; color: var(--rec-muted); font-weight: 500; }
+
+/* ===== modal width ===== */
+#editKuwaiti .modal-dialog { max-width: 920px; }
