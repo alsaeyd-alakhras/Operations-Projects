@@ -47,9 +47,10 @@ class KuwaitiCasesExport implements FromArray, WithHeadings, WithColumnWidths, W
         'branch_name'          => ['الفرع', 18, 'text'],
         'eligible'             => ['رأي مدير المكتب', 16, 'center'],
         'need_percentage'      => ['نسبة الاحتياج', 14, 'center'],
-        'researcher_opinion'   => ['رأي الباحث الاجتماعي', 36, 'wrap'],
+        'branch_notes'         => ['ملاحظات الفرع', 36, 'wrap'],
         'management'           => ['موافقة الإدارة', 16, 'center'],
         'management_notes'     => ['ملاحظات الإدارة', 32, 'wrap'],
+        'done'                 => ['تمت', 10, 'center'],
         'data_entry'           => ['مدخل البيانات', 18, 'text'],
         'case_description'     => ['وصف الحالة', 50, 'wrap'],
     ];
@@ -192,6 +193,13 @@ class KuwaitiCasesExport implements FromArray, WithHeadings, WithColumnWidths, W
                 return $get($key.'_label') ?? '';
             case 'management':
                 return $get('management_status_label') ?? '';
+            case 'done':
+                if (($label = $get('done_label')) !== null && $label !== '') {
+                    return $label;
+                }
+                $done = $get('done');
+
+                return $done === null || $done === '' ? '' : (filter_var($done, FILTER_VALIDATE_BOOLEAN) ? 'نعم' : 'لا');
             case 'exam_cost':
                 $v = $get($key);
 

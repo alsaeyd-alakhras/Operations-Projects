@@ -22,6 +22,7 @@ Route::group([
     Route::post('kuwaiti-cases/export', [KuwaitiCaseController::class, 'export'])->name('kuwaiti-cases.export');
     Route::post('kuwaiti-cases/archive', [KuwaitiCaseController::class, 'archive'])->name('kuwaiti-cases.archive');
     Route::post('kuwaiti-cases/{kuwaiti_case}/management', [KuwaitiCaseController::class, 'management'])->name('kuwaiti-cases.management');
+    Route::post('kuwaiti-cases/{kuwaiti_case}/done', [KuwaitiCaseController::class, 'done'])->name('kuwaiti-cases.done');
     Route::resource('kuwaiti-cases', KuwaitiCaseController::class)->except(['show']);
 
     Route::get('records/archived', [RecordController::class, 'archived'])->name('records.archived');

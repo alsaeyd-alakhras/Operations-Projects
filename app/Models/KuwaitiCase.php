@@ -82,7 +82,8 @@ class KuwaitiCase extends Model
         'branch_id',
         'eligible',
         'need_percentage',
-        'researcher_opinion',
+        'branch_notes',
+        'done',
         'management_status',
         'management_notes',
         'user_id',
@@ -92,6 +93,7 @@ class KuwaitiCase extends Model
         'date' => 'date:Y-m-d',
         'birth_date' => 'date:Y-m-d',
         'eligible' => 'boolean',
+        'done' => 'boolean',
         'need_percentage' => 'integer',
         'total_score' => 'integer',
     ];
@@ -154,7 +156,12 @@ class KuwaitiCase extends Model
 
     public function getEligibleLabelAttribute(): string
     {
-        return is_null($this->eligible) ? 'لم يُحدد' : ($this->eligible ? 'محتاج' : 'غير محتاج');
+        return is_null($this->eligible) ? 'غير محدد' : ($this->eligible ? 'يستحق' : 'لا يستحق');
+    }
+
+    public function getDoneLabelAttribute(): string
+    {
+        return $this->done ? 'نعم' : 'لا';
     }
 
     public function getManagementStatusLabelAttribute(): string
@@ -176,6 +183,15 @@ class KuwaitiCase extends Model
 
         static::saving(function (KuwaitiCase $case) {
             $case->total_score = self::scoreFor($case->getAttributes());
+
+            // تحديد «تمت» ينقل الحالة مباشرة إلى الأرشيف، وإلغاؤه يعيدها إلى القائمة الأساسية
+            if ($case->isDirty('done')) {
+                if ($case->done) {
+                    $case->archived = true;
+                } elseif ($case->exists) {
+                    $case->archived = false;
+                }
+            }
         });
 
         static::observe(KuwaitiCaseObserver::class);

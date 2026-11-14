@@ -38,7 +38,7 @@ class HomeController extends Controller
             try {
                 $base = KuwaitiCase::where('archived', 0);
                 if ($user->isBranchUser()) {
-                    $kuwaitiChip = ['label' => 'لم يحدد الفرع', 'count' => (clone $base)->whereNull('eligible')->count()];
+                    $kuwaitiChip = ['label' => 'بانتظار رأي مدير المكتب', 'count' => (clone $base)->whereNull('eligible')->count()];
                 } elseif ($user->can('management', KuwaitiCase::class)) {
                     $kuwaitiChip = ['label' => 'بانتظار موافقة الإدارة', 'count' => (clone $base)->where(function ($q) {
                         $q->whereNull('management_status')->orWhere('management_status', '')->orWhere('management_status', 'pending');

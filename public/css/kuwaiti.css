@@ -47,3 +47,7 @@ html.rec-dark .kw-score--mid { color: #f2b950; background: rgba(242, 185, 80, .1
 
 /* ===== modal width ===== */
 #editKuwaiti .modal-dialog { max-width: 920px; }
+
+/* ===== «تمت» inline checkbox ===== */
+.kw-done-check { width: 18px; height: 18px; margin: 0; accent-color: var(--rec-brand); cursor: pointer; vertical-align: middle; }
+.kw-done-check:disabled { cursor: default; opacity: .75; }

@@ -45,10 +45,14 @@ class KuwaitiCasesImport implements ToCollection
         'data_entry' => ['مدخل البيانات'],
         'eligible' => ['رأي مدير المكتب'],
         'need_percentage' => ['نسبة الاحتياج'],
-        'researcher_opinion' => ['رأي الباحث'],
+        // «رأي الباحث الاجتماعي» (سؤال Forms) و«ملاحظات الفرع» يدخلان معًا في حقل ملاحظات الفرع branch_notes
+        '_researcher_note' => ['رأي الباحث'],
+        'branch_notes' => ['ملاحظات الفرع'],
         'case_description' => ['وصف الحالة'],
         'management_status' => ['موافقة الإدارة', 'موافقة الادارة'],
         'management_notes' => ['ملاحظات الإدارة', 'ملاحظات الادارة'],
+        // كلمة تبدأ بـ «=» تعني تطابق العنوان كاملًا (كي لا تلتقط «تمت» جزءًا من نص سؤال طويل)
+        'done' => ['=تمت', '=تم الفحص', '=تمت العملية', '=تم التصوير'],
         '_date' => ['completion time', 'وقت الاكتمال'],
     ];
 
@@ -128,8 +132,13 @@ class KuwaitiCasesImport implements ToCollection
         if (($percentage = self::parsePercentage($cell('need_percentage'))) !== null) {
             $attributes['need_percentage'] = $percentage;
         }
-        if (($opinion = $text('researcher_opinion')) !== '') {
-            $attributes['researcher_opinion'] = $opinion;
+        // رأي الباحث الاجتماعي يُدمج مع ملاحظات الفرع: كل واحد تحت الآخر (ملاحظات الفرع أولًا)
+        $branchNotes = array_values(array_filter([$text('branch_notes'), $text('_researcher_note')], fn ($note) => $note !== ''));
+        if ($branchNotes) {
+            $attributes['branch_notes'] = implode("\n", $branchNotes);
+        }
+        if (($done = self::parseBool($cell('done'))) !== null) {
+            $attributes['done'] = $done;
         }
         if (($status = self::choice($text('management_status'), Record::MANAGEMENT_STATUSES)) !== null) {
             $attributes['management_status'] = $status;
@@ -156,7 +165,9 @@ class KuwaitiCasesImport implements ToCollection
                     continue;
                 }
                 foreach ($keywords as $keyword) {
-                    if (str_contains($header, self::normalize($keyword))) {
+                    $exact = str_starts_with($keyword, '=');
+                    $needle = self::normalize($exact ? substr($keyword, 1) : $keyword);
+                    if ($exact ? $header === $needle : str_contains($header, $needle)) {
                         $map[$field] = $index;
                         $used[$index] = true;
                         continue 3;
@@ -243,18 +254,45 @@ class KuwaitiCasesImport implements ToCollection
         return count($matches) === 1 ? $matches[0] : null;
     }
 
-    /** محتاج → true، غير محتاج → false (يفحص «غير» أولًا)، وإلا null. */
+    /**
+     * رأي مدير المكتب: محتاج / يستحق → true، غير محتاج / لا يستحق → false (يفحص «غير» و«لا» أولًا)،
+     * وغير محدد / لم يحدد / فارغ → null.
+     */
     public static function parseEligible(string $value): ?bool
     {
         $normalized = self::normalize($value);
-        if ($normalized === '') {
+        if ($normalized === '' || str_contains($normalized, 'محدد') || str_contains($normalized, 'يحدد')) {
             return null;
         }
-        if (str_starts_with($normalized, 'غير') || $normalized === 'لا') {
+        if (str_starts_with($normalized, 'غير') || str_starts_with($normalized, 'لا ') || $normalized === 'لا') {
             return false;
         }
-        if (str_contains($normalized, 'محتاج') || $normalized === 'نعم') {
+        if (str_contains($normalized, 'محتاج') || str_contains($normalized, 'يستحق') || $normalized === 'نعم') {
             return true;
+        }
+
+        return null;
+    }
+
+    /** نعم / yes / 1 / true / صح → true؛ لا / no / 0 / false → false؛ وإلا null (يقبل منطقي Excel أيضًا). */
+    public static function parseBool(mixed $value): ?bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+        if ($value === null || $value === '') {
+            return null;
+        }
+        if (is_int($value) || is_float($value)) {
+            return $value == 1 ? true : ($value == 0 ? false : null);
+        }
+        $normalized = self::normalize((string) $value);
+        $raw = strtolower(trim((string) $value));
+        if (in_array($raw, ['1', 'true', 'yes', 'y'], true) || in_array($normalized, ['نعم', 'تمت', 'تم', 'صح'], true)) {
+            return true;
+        }
+        if (in_array($raw, ['0', 'false', 'no', 'n'], true) || in_array($normalized, ['لا', 'لم تتم', 'لم يتم', 'خطا'], true)) {
+            return false;
         }
 
         return null;

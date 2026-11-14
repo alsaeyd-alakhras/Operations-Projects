@@ -126,9 +126,9 @@
             <div class="form-group col-md-4">
                 <label for="eligible">رأي مدير المكتب</label>
                 <select name="eligible" id="eligible" class="form-control form-control-alternative" {{ $isBranch ? '' : 'disabled' }}>
-                    <option value="">لم يُحدد</option>
-                    <option value="1">محتاج</option>
-                    <option value="0">غير محتاج</option>
+                    <option value="">غير محدد</option>
+                    <option value="1">يستحق</option>
+                    <option value="0">لا يستحق</option>
                 </select>
             </div>
             <div class="form-group col-md-4">
@@ -141,11 +141,22 @@
                 </select>
             </div>
             <div class="form-group col-md-12">
-                <label for="researcher_opinion">رأي الباحث الاجتماعي</label>
-                <textarea name="researcher_opinion" id="researcher_opinion" rows="2" class="form-control form-control-alternative" {{ $isBranch ? '' : 'disabled' }}></textarea>
+                <label for="branch_notes">ملاحظات الفرع</label>
+                <textarea name="branch_notes" id="branch_notes" rows="2" class="form-control form-control-alternative" {{ $isBranch ? '' : 'disabled' }}></textarea>
             </div>
         </div>
     </section>
+
+    @can('done', 'App\\Models\\KuwaitiCase')
+    <section class="rec-section">
+        <h6 class="rec-section__title">حالة الفحص</h6>
+        <div class="row">
+            <div class="form-group col-md-3">
+                <label class="rec-check" for="done"><input type="checkbox" name="done" id="done"> تمت</label>
+            </div>
+        </div>
+    </section>
+    @endcan
 
     @can('management', 'App\\Models\\KuwaitiCase')
     <section class="rec-section">

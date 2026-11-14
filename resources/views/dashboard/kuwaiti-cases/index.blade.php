@@ -69,6 +69,7 @@
             <thead>
 <tr>
 <th class="text-white text-center" data-label="الترقيم">#</th>
+<th>@include('dashboard.records._th-filter', ['col' => 'done', 'label' => 'تمت', 'type' => 'bool'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'date', 'label' => 'التاريخ', 'type' => 'date'])</th>
 <th class="sticky">@include('dashboard.records._th-filter', ['col' => 'name', 'label' => 'اسم المريض', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'patient_ID', 'label' => 'رقم الهوية', 'type' => 'list'])</th>
@@ -86,9 +87,9 @@
 <th>@include('dashboard.records._th-filter', ['col' => 'family_burden', 'label' => 'حجم الأسرة', 'type' => 'enum', 'options' => $labels(KuwaitiCase::FAMILY_BURDENS)])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'total_score', 'label' => 'النقاط', 'type' => 'range', 'rangeKey' => 'score'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'branch_name', 'label' => 'الفرع', 'type' => 'list'])</th>
-<th>@include('dashboard.records._th-filter', ['col' => 'eligible', 'label' => 'رأي مدير المكتب', 'type' => 'bool'])</th>
+<th>@include('dashboard.records._th-filter', ['col' => 'eligible', 'label' => 'رأي مدير المكتب', 'type' => 'enum', 'options' => ['1' => 'يستحق', '0' => 'لا يستحق']])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'need_percentage', 'label' => 'نسبة الاحتياج', 'type' => 'enum', 'options' => KuwaitiCase::NEED_PERCENTAGES])</th>
-<th data-label="رأي الباحث الاجتماعي">رأي الباحث الاجتماعي</th>
+<th>@include('dashboard.records._th-filter', ['col' => 'branch_notes', 'label' => 'ملاحظات الفرع', 'type' => 'list'])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'management_status', 'label' => 'موافقة الإدارة', 'type' => 'enum', 'options' => \App\Models\Record::MANAGEMENT_STATUSES])</th>
 <th>@include('dashboard.records._th-filter', ['col' => 'data_entry', 'label' => 'مدخل البيانات', 'type' => 'list'])</th>
 <th class="rec-actions">إجراءات</th>
@@ -97,6 +98,7 @@
             <tfoot>
 <tr>
                 <td class="text-white opacity-8 text-center" id="count_records"></td>
+                <td></td>
                 <td></td>
                 <td class='sticky text-right'>المجموع</td>
                 <td></td>
@@ -190,9 +192,10 @@
                 const isBranchUser = @json($isBranch);
                 const isArchived = {{ $archived ? 'true' : 'false' }};
                 const canManage = @json(auth()->user()->can('management', 'App\\Models\\KuwaitiCase'));
+                const canDone = @json(auth()->user()->can('done', 'App\\Models\\KuwaitiCase'));
                 const currentUserName = @json(auth()->user()->name);
                 const radioFields = ['exam_need', 'housing_status', 'income_status', 'family_burden'];
-                const branchFields = ['eligible', 'need_percentage', 'researcher_opinion'];
+                const branchFields = ['eligible', 'need_percentage', 'branch_notes'];
                 const mgmtFields = ['management_status', 'management_notes'];
                 const toast = (message, type) => RecordsTable.toast(message, type);
                 $.validator.messages.required = "هذا الحقل مطلوب";
@@ -223,6 +226,11 @@
                     languageUrl: "{{ asset('files/Arabic.json') }}",
                     columns: [
                         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, className: 'text-center' },
+                        { data: 'done', name: 'done', orderable: false, className: 'text-center', render: function (data, type, row) {
+                            const checked = data === true || data === 1 || data === '1';
+                            if (type !== 'display') return checked ? 'نعم' : 'لا';
+                            return '<input type="checkbox" class="kw-done-check" data-id="' + row.id + '"' + (checked ? ' checked' : '') + (canDone ? '' : ' disabled') + ' aria-label="تمت">';
+                        } },
                         { data: 'date', name: 'date', orderable: false },
                         { data: 'name', name: 'name', orderable: false, className: 'sticky' },
                         { data: 'patient_ID', name: 'patient_ID', orderable: false },
@@ -248,12 +256,12 @@
                         { data: 'eligible', name: 'eligible', orderable: false, render: function (data, type, row) {
                             const label = row.eligible_label || '';
                             if (type !== 'display') return label;
-                            if (row.eligible === true || row.eligible === 1 || row.eligible === '1') return '<span class="rec-chip rec-chip--yes">' + label + '</span>';
-                            if (row.eligible === false || row.eligible === 0 || row.eligible === '0') return '<span class="rec-chip rec-chip--no">' + label + '</span>';
-                            return label;
+                            if (row.eligible === true || row.eligible === 1 || row.eligible === '1') return '<span class="rec-chip rec-chip--green">' + label + '</span>';
+                            if (row.eligible === false || row.eligible === 0 || row.eligible === '0') return '<span class="rec-chip rec-chip--red">' + label + '</span>';
+                            return '<span class="rec-chip rec-chip--gray">' + (label || 'غير محدد') + '</span>';
                         } },
                         { data: 'need_percentage', name: 'need_percentage', orderable: false, className: 'text-center', render: function (data, type, row) { return row.need_percentage_label || ''; } },
-                        { data: 'researcher_opinion', name: 'researcher_opinion', orderable: false, render: RecordsTable.noteRender },
+                        { data: 'branch_notes', name: 'branch_notes', orderable: false, render: RecordsTable.noteRender },
                         RecordsTable.managementColumn({ canManage: canManage, url: '{{ route("kuwaiti-cases.management", ":id") }}', csrf: '{{ csrf_token() }}' }),
                         { data: 'data_entry', name: 'data_entry', orderable: false },
                         { data: 'edit', name: 'actions', orderable: false, searchable: false, className: 'rec-actions', render: function (data, type, row) {
@@ -277,6 +285,30 @@
                     ]
                 });
 
+                // ===== «تمت»: حفظ مباشر من الجدول (مثل موافقة الإدارة) =====
+                $(document).off('change.kwdone').on('change.kwdone', '.kw-done-check', function () {
+                    if (!canDone) return;
+                    const $box = $(this), want = this.checked, row = table.row($box.closest('tr'));
+                    $box.prop('disabled', true);
+                    $.ajax({
+                        url: '{{ route("kuwaiti-cases.done", ":id") }}'.replace(':id', $box.data('id')),
+                        method: 'POST', dataType: 'json',
+                        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        data: { done: want ? 1 : 0 }
+                    }).done(function (res) {
+                        const saved = res && res.done !== undefined ? !!res.done : want;
+                        const rowData = row.data();
+                        if (rowData) rowData.done = saved;
+                        $box.prop('checked', saved);
+                        // الحالة انتقلت بين القائمة الأساسية والأرشيف: نحدّث الجدول لتختفي من هذه القائمة
+                        toast((res && res.message) || 'تم حفظ حالة تمت');
+                        if (res && res.archived !== undefined && !!res.archived !== !!isArchived) table.ajax.reload(null, false);
+                    }).fail(function () {
+                        $box.prop('checked', !want);
+                        toast('تعذر حفظ حالة تمت', 'error');
+                    }).always(function () { $box.prop('disabled', false); });
+                });
+
                 // ===== live total of the 4 evaluation groups =====
                 function recalcTotal() {
                     let total = 0;
@@ -294,8 +326,8 @@
                     address: '', displacement_address: '', phone_number: '', exam: '', exam_cost: '',
                     exam_need: '', housing_status: '', income_status: '', family_burden: '',
                     case_description: '', data_entry: '', branch_id: '',
-                    eligible: '', need_percentage: '', researcher_opinion: '',
-                    management_status: '', management_notes: ''
+                    eligible: '', need_percentage: '', branch_notes: '',
+                    management_status: '', management_notes: '', done: ''
                 };
                 function fillRecord(response) {
                     response = response || {};
@@ -305,8 +337,10 @@
                     record.birth_date = d10(response.birth_date);
                     record.eligible = response.eligible === null || response.eligible === undefined || response.eligible === '' ? '' : (response.eligible ? '1' : '0');
                     record.need_percentage = response.need_percentage === null || response.need_percentage === undefined ? '' : String(response.need_percentage);
+                    record.done = response.done === true || response.done === 1 || response.done === '1' ? 1 : 0;
+                    $('#done').prop('checked', record.done === 1);
                     $.each(record, function (key, value) {
-                        if (radioFields.indexOf(key) !== -1) return;
+                        if (radioFields.indexOf(key) !== -1 || key === 'done') return;
                         const input = $('#' + key);
                         if (input.length) input.val(value);
                     });
@@ -319,6 +353,7 @@
                 function collectRecord() {
                     $.each(record, function (key) {
                         if (key === 'id') return;
+                        if (key === 'done') { record.done = $('#done').is(':checked') ? 1 : 0; return; }
                         if (radioFields.indexOf(key) !== -1) { record[key] = $('input[name="' + key + '"]:checked').val() || ''; return; }
                         const input = $('#' + key);
                         if (input.length) record[key] = input.val();
@@ -376,20 +411,22 @@
                     collectRecord();
                     let data = { ...record };
                     if (isBranchUser) {
-                        data = { eligible: record.eligible, need_percentage: record.need_percentage, researcher_opinion: record.researcher_opinion, management_status: record.management_status, management_notes: record.management_notes };
+                        data = { eligible: record.eligible, need_percentage: record.need_percentage, branch_notes: record.branch_notes, management_status: record.management_status, management_notes: record.management_notes };
+                        if (canDone) data.done = record.done;
                     } else {
                         branchFields.forEach(function (field) { delete data[field]; });
                     }
                     if (!canManage) mgmtFields.forEach(function (field) { delete data[field]; });
+                    if (!canDone) delete data.done;
                     $.ajax({
                         url: "{{ route('kuwaiti-cases.update', ':id') }}".replace(':id', record.id),
                         method: 'PUT',
                         headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                         data: data,
-                        success: function () {
+                        success: function (res) {
                             $('#editKuwaiti').modal('hide');
                             table.ajax.reload(null, false);
-                            toast('تم التعديل بنجاح');
+                            toast((res && res.done_changed && res.message) ? res.message : 'تم التعديل بنجاح');
                         },
                         error: function () { $('#alerts').text('هنالك خطأ في إدخال الداتا يرجى التحقق منها.').slideDown(); }
                     });
@@ -426,6 +463,7 @@
                     delete data.id;
                     branchFields.forEach(function (field) { delete data[field]; });
                     mgmtFields.forEach(function (field) { delete data[field]; });
+                    if (!canDone) delete data.done;
                     $.ajax({
                         url: "{{ route('kuwaiti-cases.store') }}",
                         method: 'POST',

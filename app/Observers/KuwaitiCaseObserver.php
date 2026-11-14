@@ -16,14 +16,17 @@ class KuwaitiCaseObserver
     public function updated(KuwaitiCase $case): void
     {
         $changes = array_values(array_diff(array_keys($case->getChanges()), ['updated_at', 'total_score']));
-        $isBranchUpdate = ! empty($changes) && empty(array_diff($changes, ['eligible', 'need_percentage', 'researcher_opinion']));
+        $isBranchUpdate = ! empty($changes) && empty(array_diff($changes, ['eligible', 'need_percentage', 'branch_notes']));
         $isManagementUpdate = ! empty($changes) && empty(array_diff($changes, ['management_status', 'management_notes']));
+        $isDoneUpdate = ! empty($changes) && empty(array_diff($changes, ['done', 'archived']));
 
         $this->log('update', $isBranchUpdate
             ? 'حالة الكويتي: تم تحديث رأي الفرع لحالة : ' . $case->name
             : ($isManagementUpdate
                 ? 'حالة الكويتي: تم تحديث موافقة الإدارة لحالة : ' . $case->name
-                : 'حالة الكويتي: تم تعديل بيانات حالة : ' . $case->name));
+                : ($isDoneUpdate
+                    ? 'تم تحديث حالة تمت لحالة الكويتي : ' . $case->name . ($case->archived ? ' (نُقلت إلى الأرشيف)' : '')
+                    : 'حالة الكويتي: تم تعديل بيانات حالة : ' . $case->name)));
     }
 
     private function log(string $type, string $message): void

@@ -42,6 +42,7 @@ class KuwaitiCaseController extends Controller
                 ->addColumn('family_burden_label', fn (KuwaitiCase $case) => $case->family_burden_label)
                 ->addColumn('branch_name', fn (KuwaitiCase $case) => $case->branch_name_sql)
                 ->addColumn('eligible_label', fn (KuwaitiCase $case) => $case->eligible_label)
+                ->addColumn('done_label', fn (KuwaitiCase $case) => $case->done_label)
                 ->addColumn('need_percentage_label', fn (KuwaitiCase $case) => $case->need_percentage_label)
                 ->addColumn('management_status_label', fn (KuwaitiCase $case) => $case->management_status_label)
                 ->addColumn('edit', fn (KuwaitiCase $case) => $case->id)
@@ -96,21 +97,23 @@ class KuwaitiCaseController extends Controller
         $this->authorize('update', KuwaitiCase::class);
 
         if ($request->user()->isBranchUser()) {
-            // يوزر الفرع: رأي مدير المكتب ونسبة الاحتياج ورأي الباحث فقط، وأي حقل آخر يُتجاهل
+            // يوزر الفرع: رأي مدير المكتب ونسبة الاحتياج وملاحظات الفرع فقط، وأي حقل آخر يُتجاهل
             $request->merge(['eligible' => $request->input('eligible') === '' ? null : $request->input('eligible')]);
             $data = $request->validate([
                 'eligible' => ['nullable', 'boolean'],
                 'need_percentage' => ['nullable', Rule::in(array_keys(KuwaitiCase::NEED_PERCENTAGES))],
-                'researcher_opinion' => ['nullable', 'string', 'max:5000'],
+                'branch_notes' => ['nullable', 'string', 'max:5000'],
             ]);
         } else {
             $data = $request->validate($this->coreRules());
         }
 
-        $kuwaitiCase->update($data + $this->managementFields($request));
+        $wasDone = (bool) $kuwaitiCase->done;
+        $kuwaitiCase->update($data + $this->managementFields($request) + $this->doneFields($request));
+        $doneChanged = (bool) $kuwaitiCase->done !== $wasDone;
 
         return $request->ajax()
-            ? response()->json(['message' => 'تم التحديث بنجاح'])
+            ? response()->json(['message' => $doneChanged ? $this->doneMessage($kuwaitiCase) : 'تم التحديث بنجاح', 'done' => (bool) $kuwaitiCase->done, 'archived' => (bool) $kuwaitiCase->archived, 'done_changed' => $doneChanged])
             : redirect()->route('kuwaiti-cases.index')->with('success', 'تم تعديل بيانات الحالة');
     }
 
@@ -133,6 +136,17 @@ class KuwaitiCaseController extends Controller
             'status_label' => $kuwaitiCase->management_status_label,
             'notes' => $kuwaitiCase->management_notes,
         ]);
+    }
+
+    /** تحديد «تمت» من الجدول مباشرة (يحتاج صلاحية kuwaiticases.done). */
+    public function done(Request $request, KuwaitiCase $kuwaitiCase)
+    {
+        $this->authorize('done', KuwaitiCase::class);
+        $this->normalizeDone($request);
+        $data = $request->validate(['done' => ['required', 'boolean']]);
+        $kuwaitiCase->update(['done' => (bool) $data['done']]);
+
+        return response()->json(['done' => (bool) $kuwaitiCase->done, 'archived' => (bool) $kuwaitiCase->archived, 'message' => $this->doneMessage($kuwaitiCase)]);
     }
 
     public function destroy(Request $request, KuwaitiCase $kuwaitiCase)
@@ -205,6 +219,8 @@ class KuwaitiCaseController extends Controller
             ->leftJoin('branches', 'branches.id', '=', 'kuwaiti_cases.branch_id')
             ->where('kuwaiti_cases.archived', (int) $request->boolean('archived'));
         $this->applyBaseFilters($query, $request, false);
+        // مثل Excel: فلاتر الأعمدة الأخرى (والواجهة تستثني فلتر هذا العمود) تضيّق قيم القائمة
+        $this->applyColumnFilters($query, $request->input('filters', []));
         $query->whereNotNull($expr)->where($expr, '<>', '');
         if ($request->filled('q')) {
             $query->where($expr, 'like', '%' . $this->escapeLike($request->input('q')) . '%');
@@ -294,11 +310,11 @@ class KuwaitiCaseController extends Controller
         return [
             'name' => 'list', 'patient_ID' => 'list', 'phone_number' => 'list', 'address' => 'list',
             'displacement_address' => 'list', 'exam' => 'list', 'exam_cost' => 'list', 'total_score' => 'list',
-            'data_entry' => 'list', 'branch_name' => 'list', 'researcher_opinion' => 'list', 'management_notes' => 'list',
+            'data_entry' => 'list', 'branch_name' => 'list', 'branch_notes' => 'list', 'management_notes' => 'list',
             'gender' => 'gender', 'marital_status' => 'marital_status', 'exam_need' => 'exam_need',
             'housing_status' => 'housing_status', 'income_status' => 'income_status', 'family_burden' => 'family_burden',
             'need_percentage' => 'need_percentage', 'management_status' => 'management_status',
-            'eligible' => 'boolean',
+            'eligible' => 'boolean', 'done' => 'boolean',
         ];
     }
 
@@ -397,6 +413,38 @@ class KuwaitiCaseController extends Controller
         ];
     }
 
+    /** حقل «تمت» يُقبل فقط من مستخدم يملك صلاحية kuwaiticases.done، وإلا يُتجاهل. */
+    private function doneFields(Request $request): array
+    {
+        if (! $request->user()->can('done', KuwaitiCase::class) || ! $request->has('done')) {
+            return [];
+        }
+        $this->normalizeDone($request);
+        $data = $request->validate(['done' => ['nullable', 'boolean']]);
+
+        return ['done' => (bool) ($data['done'] ?? false)];
+    }
+
+    /** jQuery يرسل true/false كنص 'true'/'false'، فنحوّله إلى 1/0 قبل التحقق (القيم غير المعروفة تبقى كما هي فيرفضها التحقق). */
+    /** رسالة واضحة عند تغيّر «تمت»: تمت العملية ونُقلت للأرشيف، أو أُلغيت وأُعيدت للقائمة الأساسية. */
+    private function doneMessage(KuwaitiCase $case): string
+    {
+        return $case->done
+            ? 'تمت العملية وتم نقل الحالة إلى الأرشيف'
+            : 'تم إلغاء «تمت» وإعادة الحالة إلى القائمة الأساسية';
+    }
+
+    private function normalizeDone(Request $request): void
+    {
+        if (! $request->has('done')) {
+            return;
+        }
+        $value = filter_var($request->input('done'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($value !== null) {
+            $request->merge(['done' => $value ? 1 : 0]);
+        }
+    }
+
     private function denyBranchUser(Request $request): void
     {
         abort_if($request->user()->isBranchUser(), 403);
@@ -415,6 +463,7 @@ class KuwaitiCaseController extends Controller
             'family_burden_label' => $case->family_burden_label,
             'branch_name' => Arr::get($case->getAttributes(), 'branch_name_sql') ?? $case->branch?->name,
             'eligible_label' => $case->eligible_label,
+            'done_label' => $case->done_label,
             'need_percentage_label' => $case->need_percentage_label,
             'management_status_label' => $case->management_status_label,
         ]);
